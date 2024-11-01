@@ -96,6 +96,65 @@ public:
             << "KRW 5000 : " << cash5000 << ", "
             << "KRW 1000 : " << cash1000 << "}\n";
     }
+
+    void startSession(const vector<Bank*>& allBanks) {
+        string cardNumber, password;
+        cout << "\nPlease insert your card (Enter Account Number): ";
+        cin >> cardNumber;
+        cout << "Enter Password: ";
+        cin >> password;
+
+        Account* authenticatedAccount = nullptr;
+        for (Bank* bank : allBanks) {
+            authenticatedAccount = bank->authenticate(cardNumber, password);
+            if (authenticatedAccount) {
+                cout << "Authentication successful. Welcome, " << authenticatedAccount->username << "!\n";
+                break;
+            }
+        }
+
+        if (!authenticatedAccount) {
+            cout << "Authentication failed. Ending session.\n";
+            return;
+        }
+
+        vector<string> transactions;
+        while (true) {
+            cout << "\nSelect Transaction:\n1. Deposit\n2. Withdraw\n3. Transfer\n4. Exit\n";
+            int choice;
+            cin >> choice;
+
+            if (choice == 4) break;
+
+            // 거래 처리 예시 (입금, 출금, 송금에 대한 간단한 메시지)
+            switch (choice) {
+            case 1:
+                transactions.push_back("Deposit completed.");
+                cout << "Deposit completed.\n";
+                break;
+            case 2:
+                transactions.push_back("Withdrawal completed.");
+                cout << "Withdrawal completed.\n";
+                break;
+            case 3:
+                transactions.push_back("Transfer completed.");
+                cout << "Transfer completed.\n";
+                break;
+            default:
+                cout << "Invalid choice.\n";
+            }
+        }
+
+        if (!transactions.empty()) {
+            cout << "\nTransaction Summary:\n";
+            for (const auto& t : transactions) {
+                cout << "- " << t << "\n";
+            }
+        }
+        else {
+            cout << "\nNo transactions completed in this session.\n";
+        }
+    }
 };
 
 void displaySnapshot(const vector<Bank>& banks, const vector<ATM>& atms) {
@@ -228,11 +287,28 @@ int main() {
     // Program execution loop to check for '/' input
     string command;
     while (true) {
-        cout << "\nEnter '/' to display snapshot or 'exit' to quit: ";
+        cout << "\nEnter '/' to display snapshot, 'session' to start an ATM session, or 'exit' to quit: ";
         cin >> command;
 
         if (command == "/") {
             displaySnapshot(banks, atms);
+        }
+        else if (command == "session") {
+            if (atms.empty()) {
+                cout << "No ATMs available. Please create an ATM first.\n";
+            }
+            else {
+                int atmIndex;
+                cout << "Enter ATM index (1 to " << atms.size() << ") to start session: ";
+                cin >> atmIndex;
+
+                if (atmIndex >= 1 && atmIndex <= atms.size()) {
+                    atms[atmIndex - 1].startSession(allBanks);
+                }
+                else {
+                    cout << "Invalid ATM index.\n";
+                }
+            }
         }
         else if (command == "exit") {
             break;
