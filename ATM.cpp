@@ -370,22 +370,28 @@ public:
         }
 
         int transferAmount;
-        cout << "Input amount of fund to transfer: ";
-        cin >> transferAmount;
+
         /////////////
         if (transferType == 1) { // Cash transfer
+
             int cash1000, cash5000, cash10000, cash50000;
-            cout << "Please, insert cash including the transfer fee (KRW " << transferFee << ")\n";
+            int command;
+            int insertedAmount;
+
+            do{
+            //cout << "Please, insert cash including the transfer fee (KRW " << transferFee << ")\n";
             cout << "num of KRW 1000: "; cin >> cash1000;
             cout << "num of KRW 5000: "; cin >> cash5000;
             cout << "num of KRW 10000: "; cin >> cash10000;
             cout << "num of KRW 50000: "; cin >> cash50000;
 
-            int insertedAmount = cash1000 * 1000 + cash5000 * 5000 + cash10000 * 10000 + cash50000 * 50000;
-            if (insertedAmount < transferAmount + transferFee) {
-                cout << "Insufficient cash inserted for the transfer amount and fee.\nTransfer canceled.\n";
-                return;
-            }
+
+            insertedAmount = cash1000 * 1000 + cash5000 * 5000 + cash10000 * 10000 + cash50000 * 50000;
+            cout << "Please check the total amount of transfer cash : " << insertedAmount << " KRW : 1. yes 2. no\n"; 
+            cin >>command;
+
+            
+            }while(command!=1);
 
             // ATM 현금 증가 (REQ6.6)
             this->cash1000 += cash1000;
@@ -395,6 +401,10 @@ public:
 
             // 투입된 현금에서 수수료를 제외한 금액이 목적지 계좌로 전송됨 (REQ6.3)
             transferAmount = insertedAmount - transferFee;
+            if(transferAmount<0){
+                return; //일단 끝내
+            }
+            
         }
         else if (transferType == 2) { // Account transfer
             // Account transfer는 원천 계좌에서 금액과 수수료가 차감됨
