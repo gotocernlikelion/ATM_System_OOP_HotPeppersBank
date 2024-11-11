@@ -371,7 +371,6 @@ public:
 
         int transferAmount;
 
-        /////////////
         if (transferType == 1) { // Cash transfer
 
             int cash1000, cash5000, cash10000, cash50000;
