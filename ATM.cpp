@@ -168,12 +168,16 @@ public:
         }
 
         bool isCashDeposit = (depositType == 1);
+        bool isCheckDeposit = (depositType ==2);
         bool requiresFee = (primaryBank != userBank);  // Primary Bank 여부 확인
         int fee = 0;
 
         // 수수료 설정 (REQ1.8)
         if (isCashDeposit) {
             fee = requiresFee ? 2000 : 1000;  // non-primary: 2000원, primary: 1000원
+        }
+        else if (isCheckDeposit){
+            fee = 1000;
         }
 
         // 수수료 안내
@@ -193,67 +197,104 @@ public:
             return;
         }
 
-        // 입금 지폐 수량 입력 및 제한 확인
-        int count1000, count5000, count10000, count50000;
-        int totalBills = 0;
+        if (isCashDeposit){
+            // 입금 지폐 수량 입력 및 제한 확인
+            int count1000, count5000, count10000, count50000;
+            int totalBills = 0;
 
-        cout << "How many KRW 1000 papers will you deposit? ";
-        cin >> count1000;
-        totalBills += count1000;
+            cout << "How many KRW 1000 papers will you deposit? ";
+            cin >> count1000;
+            totalBills += count1000;
 
-        cout << "How many KRW 5000 papers will you deposit? ";
-        cin >> count5000;
-        totalBills += count5000;
+            cout << "How many KRW 5000 papers will you deposit? ";
+            cin >> count5000;
+            totalBills += count5000;
 
-        cout << "How many KRW 10000 papers will you deposit? ";
-        cin >> count10000;
-        totalBills += count10000;
+            cout << "How many KRW 10000 papers will you deposit? ";
+            cin >> count10000;
+            totalBills += count10000;
 
-        cout << "How many KRW 50000 papers will you deposit? ";
-        cin >> count50000;
-        totalBills += count50000;
+            cout << "How many KRW 50000 papers will you deposit? ";
+            cin >> count50000;
+            totalBills += count50000;
 
-        // 지폐 수량 제한 (REQ4.2)
-        const int limit = 50;
-        if (totalBills > limit) {
-            cout << "You cannot insert over " << limit << " papers.\n!!Session finished!!\n";
-            return;
-        }
-
-        // 총 입금 금액 계산 (REQ4.3)
-        int depositAmount = count1000 * 1000 + count5000 * 5000 + count10000 * 10000 + count50000 * 50000;
-
-        // 수수료 차감
-        if (fee > 0) {
-            if (depositAmount < fee) {
-                cout << "Insufficient amount for the fee. Deposit canceled.\n";
+            // 지폐 수량 제한 (REQ4.2)
+            const int limit = 50;
+            if (totalBills > limit) {
+                cout << "You cannot insert over " << limit << " papers.\n!!Session finished!!\n";
                 return;
             }
-            depositAmount -= fee;
-        }
+            // 총 입금 금액 계산 (REQ4.3)
+            int depositAmount = count1000 * 1000 + count5000 * 5000 + count10000 * 10000 + count50000 * 50000;
+
+            // 수수료 차감
+            if (fee > 0) {
+                if (depositAmount < fee) {
+                    cout << "Insufficient amount for the fee. Deposit canceled.\n";
+                    return;
+                }
+                depositAmount -= fee;
+            }
 
 
-        cout << "The deposit amount is KRW " << depositAmount << "\nWould you like to continue?\n1. OK\n2. Cancel (push any key)\n-> ";
-        cin >> confirm;
-        if (confirm != 1) {
-            cout << "Deposit canceled.\n";
-            return;
-        }
+            cout << "The deposit amount is KRW " << depositAmount << "\nWould you like to continue?\n1. OK\n2. Cancel (push any key)\n-> ";
+            cin >> confirm;
+            if (confirm != 1) {
+                cout << "Deposit canceled.\n";
+                return;
+            }
 
-        // 입금 금액을 계좌 잔액에 반영
-        account->setBalance(account->getBalance()+depositAmount);
-        cout << "Successfully deposited!\nThere is KRW " << account->getBalance() << " in your account.\n";
+            // 입금 금액을 계좌 잔액에 반영
+            account->setBalance(account->getBalance()+depositAmount);
+            cout << "Successfully deposited!\nThere is KRW " << account->getBalance() << " in your account.\n";
 
-        // 현금 입금 시 ATM 현금 잔액 반영 (REQ4.5, REQ4.6)
-        if (isCashDeposit) {
+            // 현금 입금 시 ATM 현금 잔액 반영 (REQ4.5, REQ4.6)
             cash1000 += count1000;
             cash5000 += count5000;
             cash10000 += count10000;
             cash50000 += count50000;
         }
-        else {
-            cout << "(Note: Check deposits do not affect ATM cash availability.)\n";
+        
+
+        else if(isCheckDeposit){
+            int paperNum=0;
+            int checkContinue;
+            int CheckValue;
+            cout<<"How many check papers will you deposit? (30 papers limit)"<<endl;
+            cin>>paperNum;
+
+            if (paperNum>30){
+                cout<<"you cannot insert over 30 papers"<<endl;
+                return;
+            }
+
+            cout<<"There is KRW "<< account->getBalance()<<" in your account\n"<<endl;
+            cout<<"You should pay extra KRW 1,000 for deposit fee."<<endl;
+
+            cout<<"Would you like to continue ?\n1. OK\n 2. Cancle (push any key)"<<endl;
+            cin>>checkContinue;
+            
+            if(checkContinue!=1){
+                cout<<"Session finish"<<endl;
+                return;
+            }
+            for(int i=0;i<paperNum;i++){
+                cout<<"How much will you deposit with your Check?"<<endl;
+                cin>>CheckValue;
+                account->setBalance(account->getBalance()+CheckValue);   
+            }
+            cout << "Successfully deposited!\nThere is KRW " << account->getBalance() << " in your account.\n";
         }
+
+        
+
+        
+        // if (isCashDeposit) {
+            
+        // }
+        // else {
+        //     cout << "(Note: Check deposits do not affect ATM cash availability.)\n";
+        // }
     }
 
 
