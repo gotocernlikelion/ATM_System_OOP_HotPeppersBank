@@ -1,726 +1,409 @@
 #include <iostream>
 #include <string>
-#include <vector>
-#include <unordered_map>
-
 using namespace std;
+class VendingMachine;
 
-class Transaction {
+
+//
+//
+//Product클래스
+class Product {
+protected:
+    static int nextId;
+    int id;
+    string p_name;
+    double p_price;
+    double p_calorie;
+
 public:
-    static int transaction_counter; // 각 거래의 고유 ID (REQ2.4)
-    int transaction_id;
-    string type;
-    int amount;
+    Product(string name, double price, double p_calorie)
+        : p_name(name), p_price(price), p_calorie(p_calorie), id(nextId++) {
+        cout << "[Constructor] Product created: " << p_name << " (ID: " << id
+            << ", Price: $" << p_price << ")" << endl;
+    }
+    virtual int getId() const { return id; }
 
-    Transaction(const string& type, int amount) {
-        transaction_id = transaction_counter++;
-        this->type = type;
-        this->amount = amount;
+    virtual ~Product() {
+        cout << "[Destructor] Product destroyed: " << p_name << " (ID: " << id
+            << ")" << endl;
+    }
+    virtual string getName() const { return p_name; }
+    virtual double getPrice() const { return p_price; }
+
+    virtual void describe() const {
+        cout << "Product: " << p_name << " (ID: " << id << ", Price: $" << p_price
+            << endl;
+    }
+};
+int Product::nextId = 1;
+
+
+class Beverage : public Product {
+public:
+    Beverage(string name, double price, double calorie)
+        : Product(name, price, calorie) {
+        cout << "Beverage created: " << name << " (" << calorie << " calories)\n";
+    }
+
+    void describe() const override {
+        cout << "Beverage: " << getName() << " (ID: " << getId()
+            << ", Price: $" << getPrice() << ", Calorie: " << this->p_calorie <<
+            "calories)\n";
     }
 };
 
-int Transaction::transaction_counter = 1;
-
-class Account { //(REQ1.6) (REQ1.7)
-private:
-    string bankName;
-    string accountNumber;// cardNumber랑 동일
-    string username;
-    string password;
-    int balance;
-
-    vector<Transaction> transaction;
+class Snack : public Product {
 public:
-    Account(const string& bank_name, const string& user_name, const string& account_number, const string& password, int initial_balance) {
-        this->bankName = bank_name;
-        this->username = user_name;
-        this->accountNumber = account_number;
-        // this->cardNumber=card_number;
-        this->password = password;
-        this->balance = initial_balance;
-    }
-    Account() : bankName(""), accountNumber(""), username(""), password(""), balance(0) {}
-
-    string getAccountNumber() const {
-        return accountNumber;
-    }
-    string getPassword() const {
-        return password;
+    Snack(string name, double price, double calorie)
+        : Product(name, price, calorie) {
+        cout << "Snack created: " << name << " (" << calorie << " calories)\n";
     }
 
-    int getBalance() const {
-        return balance;
+    void describe() const override {
+        cout << "Snack: " << getName() << " (ID: " << getId()
+            << ", Price: $" << getPrice() << ", Calories: " << this->p_calorie <<
+            ")\n";
     }
-
-    string getUserName() const {
-        return username;
-    }
-
-    void setBalance(int money) {
-        this->balance = money;
-    }
-
-
 };
 
-
-
-class Bank {
-private:
-    string name;
-    unordered_map<string, Account> accounts;
+//
+//
+//State클래스
+class State {
+protected:
+    string s_name;
+    VendingMachine* machine;
 
 public:
-    Bank(string bankName) : name(bankName) {}
-
-    string getName() const { return name; }
-
-    void addAccount(const Account& account) {
-        accounts[account.getAccountNumber()] = account;
+    State(VendingMachine* machine)
+        : machine(machine) {
+        cout << "[Constructor] Constructing State: "<< endl;
     }
 
-    Account* authenticate(const string& accountNumber, const string& password) {
-        if (accounts.count(accountNumber) && accounts[accountNumber].getPassword() == password) {
-            return &accounts[accountNumber];
+    virtual ~State() {
+        cout << "[Destructor] Destructing State: " << endl;
+    }
+    virtual string getName() const = 0;
+    virtual void insertCoin(double coin) = 0;
+    virtual void ejectCoin() = 0;
+    virtual void dispense(string productName) = 0;
+};
+//
+//
+//VendingMachine클래스
+class VendingMachine {
+private:
+    State* noCoinState;
+    State* hasCoinState;
+    State* soldOutState;
+
+    State* currentState;
+    const int MAX_NUM_PRODUCT = 10;
+    Product* inventory[10];
+    int num_of_products; //재고 개수
+    bool hasCoin;
+    double coinValue;
+
+    void printState(string action) const {
+        cout << "Action: " << action << " | Current State: " << currentState->
+            getName() << " | Coin Value: " << this->coinValue << "\n";
+    }
+
+public:
+    VendingMachine();
+    ~VendingMachine() {
+        cout << "[Destructor] Destructing VendingMachine" << endl;
+        delete noCoinState, delete hasCoinState, delete soldOutState;
+        for (int x = 0; x < num_of_products; x++) {
+            delete inventory[x];
+        }
+    }
+
+
+    void setState(State* state) {
+        currentState = state;
+        printState("State Changed");
+    }
+
+    void insertCoin(double coin);
+
+    void ejectCoin();
+
+    void dispense(string productName);
+
+    Product* removeProduct(string productName) {
+        for (int x = 0; x < num_of_products; x++) {
+            if (inventory[x] != nullptr && inventory[x]->getName()
+                == productName) {
+
+                Product* removingProduct = inventory[x];
+                for (int y = x; y < num_of_products - 1; y++) {
+                    inventory[y] = inventory[y + 1];
+                }
+
+                inventory[num_of_products - 1] = nullptr;
+                num_of_products += -1;
+                return removingProduct;
+            }
         }
         return nullptr;
     }
 
-    // 비밀번호 없이 계좌 번호만으로 찾는 메서드 추가
-    Account* findAccountByNumber(const string& accountNumber) {
-        if (accounts.count(accountNumber)) {
-            return &accounts[accountNumber];
+
+    void addProduct(Product* product) {
+
+
+        for (int x = 0; x < MAX_NUM_PRODUCT; x++) {
+            if (inventory[x] == nullptr) {
+                inventory[x] = product;
+                num_of_products += 1;
+
+
+                if (currentState == soldOutState) {
+                    setState(noCoinState);
+                }
+                return;
+            }
         }
-        return nullptr;
     }
 
-    void displayAccounts() const {
-        for (const auto& entry : accounts) {
-            const Account& account = entry.second;
-            cout << "Account [Bank: " << name
-                << ", No: " << account.getAccountNumber()
-                << ", Owner: " << account.getUserName()
-                << "] balance: " << account.getBalance() << "Won\n";
-        }
-    }
-};
 
-
-
-class ATM {
-private:
-    string serialNumber; // ATM 시리얼 번호 (REQ1.1)
-    string atmType;      // "Single" or "Multi" (REQ1.2)
-    string language; // ATM 언어 설정: English/Bilingual (REQ1.3) //uni Bi
-    Bank* primaryBank;   // Primary bank associated with the ATM (REQ1.2)
-    int cash1000, cash5000, cash10000, cash50000;
-    string adminCardNumber; //adm card면 접근(REQ1.9)
-
-    vector<Transaction> session_transactions; // 세션 중 수행된 거래들 (REQ2.3)
-    bool session_active = false;              // 세션 상태 표시 (REQ2.1, REQ2.2)
-
-public:
-    ATM(string type, Bank* bank, string serial, string lang, int c1000, int c5000, int c10000, int c50000, string adminCard)
-        : atmType(type), primaryBank(bank), serialNumber(serial), language(lang),
-        cash1000(c1000), cash5000(c5000), cash10000(c10000), cash50000(c50000), adminCardNumber(adminCard) {}
-
-    string getSerialNumber() const {
-        return serialNumber;
-    }
-
-    bool authenticateUser(const vector<Bank*>& allBanks, const string& accountNumber, const string& password) {
-        if (atmType == "Single") {
-            Account* account = primaryBank->authenticate(accountNumber, password);
-            if (account) {
-                cout << "User authorized for Single-Bank ATM in " << primaryBank->getName() << " Bank." << endl;
+    bool isProductAvailable(string productName) const {
+        for (int x = 0; x < num_of_products; x++) {
+            if (inventory[x] != nullptr && inventory[x]->getName()
+                == productName) {
                 return true;
             }
         }
-        else if (atmType == "Multi") {
-            for (Bank* bank : allBanks) {
-                Account* account = bank->authenticate(accountNumber, password);
-                if (account) {
-                    cout << "User authorized for Multi-Bank ATM. Access granted for " << bank->getName() << " Bank." << endl;
-                    return true;
-                }
-            }
-        }
-        cout << "Authorization failed." << endl;
         return false;
     }
 
-    void displayRemainingCash() const {
-        cout << "ATM [SN: " << serialNumber << "] remaining cash: {"
-            << "KRW 50000 : " << cash50000 << ", "
-            << "KRW 10000 : " << cash10000 << ", "
-            << "KRW 5000 : " << cash5000 << ", "
-            << "KRW 1000 : " << cash1000 << "}\n";
-    }
 
-    void deposit(Account* account, Bank* userBank) {
-        int depositType;
-        cout << "\n<< Select deposit type >>\n1. Cash deposit\n2. Check deposit\n3. Cancel (push any key)\n-> ";
-        cin >> depositType;
-
-        if (depositType != 1 && depositType != 2) {
-            cout << "Deposit canceled.\n";
-            return;
+    double getProductPrice(string productName) const {
+        for (int x = 0; x < num_of_products; x++) {
+            if (inventory[x] != nullptr && inventory[x]->getName()
+                == productName) {
+                return inventory[x]->getPrice();
+            }
         }
-
-        bool isCashDeposit = (depositType == 1);
-        bool isCheckDeposit = (depositType == 2);
-        bool requiresFee = (primaryBank != userBank);  // Primary Bank 여부 확인
-        int fee = 0;
-
-        // 수수료 설정 (REQ1.8)
-        if (isCashDeposit) {
-            fee = requiresFee ? 2000 : 1000;  // non-primary: 2000원, primary: 1000원
-        }
-        else if (isCheckDeposit) {
-            fee = 1000;
-        }
-
-       
-        if (isCashDeposit) {
-            // 수수료 안내
-            if (fee > 0) {
-                cout << "Deposit fee is KRW " << fee << ". Please insert an additional bill for the fee.\n";
-            }
-            else {
-                cout << "You don't have deposit fee.\n";
-            }
-
-            // 예치 수수료 확인
-            cout << "1. OK\n2. Cancel (push any key)\n-> ";
-            int confirm;
-            cin >> confirm;
-            if (confirm != 1) {
-                cout << "Deposit canceled.\n";
-                return;
-            }
-
-            // 입금 지폐 수량 입력 및 제한 확인
-            int count1000, count5000, count10000, count50000;
-            int totalBills = 0;
-
-            cout << "How many KRW 1000 papers will you deposit? ";
-            cin >> count1000;
-            totalBills += count1000;
-
-            cout << "How many KRW 5000 papers will you deposit? ";
-            cin >> count5000;
-            totalBills += count5000;
-
-            cout << "How many KRW 10000 papers will you deposit? ";
-            cin >> count10000;
-            totalBills += count10000;
-
-            cout << "How many KRW 50000 papers will you deposit? ";
-            cin >> count50000;
-            totalBills += count50000;
-
-            // 지폐 수량 제한 (REQ4.2)
-            const int limit = 50;
-            if (totalBills > limit) {
-                cout << "You cannot insert over " << limit << " papers.\n!!Session finished!!\n";
-                return;
-            }
-            // 총 입금 금액 계산 (REQ4.3)
-            int depositAmount = count1000 * 1000 + count5000 * 5000 + count10000 * 10000 + count50000 * 50000;
-
-            // 수수료 차감
-            if (fee > 0) {
-                if (depositAmount < fee) {
-                    cout << "Insufficient amount for the fee. Deposit canceled.\n";
-                    return;
-                }
-                depositAmount -= fee;
-            }
-
-
-            cout << "The deposit amount is KRW " << depositAmount << "\nWould you like to continue?\n1. OK\n2. Cancel (push any key)\n-> ";
-            cin >> confirm;
-            if (confirm != 1) {
-                cout << "Deposit canceled.\n";
-                return;
-            }
-
-            // 입금 금액을 계좌 잔액에 반영
-            account->setBalance(account->getBalance() + depositAmount);
-            cout << "Successfully deposited!\nThere is KRW " << account->getBalance() << " in your account.\n";
-
-            // 현금 입금 시 ATM 현금 잔액 반영 (REQ4.5, REQ4.6)
-            cash1000 += count1000;
-            cash5000 += count5000;
-            cash10000 += count10000;
-            cash50000 += count50000;
-        }
-
-
-        else if (isCheckDeposit) {
-            int paperNum = 0;
-            int checkContinue;
-            int CheckValue;
-            cout << "How many check papers will you deposit? (30 papers limit)" << endl;
-            cin >> paperNum;
-
-            if (paperNum > 30) {
-                cout << "you cannot insert over 30 papers" << endl;
-                return;
-            }
-
-            cout << "There is KRW " << account->getBalance() << " in your account\n" << endl;
-            cout << "You should pay extra KRW 1,000 for deposit fee." << endl;
-
-            cout << "Would you like to continue ?\n1. OK\n 2. Cancle (push any key)" << endl;
-            cin >> checkContinue;
-
-            if (checkContinue != 1) {
-                cout << "Session finish" << endl;
-                return;
-            }
-            for (int i = 0; i < paperNum; i++) {
-                cout << "How much will you deposit with your Check?" << endl;
-                cin >> CheckValue;
-                account->setBalance(account->getBalance() + CheckValue);
-            }
-            cout << "Successfully deposited!\nThere is KRW " << account->getBalance() << " in your account.\n";
-        }
-
-
-
-
-        // if (isCashDeposit) {
-
-        // }
-        // else {
-        //     cout << "(Note: Check deposits do not affect ATM cash availability.)\n";
-        // }
+        return 0.0;
     }
 
 
-    void withdraw(Account* account, Bank* userBank) {
-        const int maxWithdrawAmount = 500000;    // REQ5.7: 출금 한도
-        const int maxWithdrawalsPerSession = 3;  // REQ5.6: 세션당 최대 출금 횟수
-        int withdrawalsThisSession = 0;          // 세션당 출금 횟수를 카운트할 변수
-
-        while (withdrawalsThisSession < maxWithdrawalsPerSession) {
-            int withdrawalAmount, fee = 0;
-            cout << "Enter amount to withdraw: ";
-            cin >> withdrawalAmount;
-
-            // REQ5.1: 사용자가 금액을 입력하면 각 지폐 단위를 계산하여 가장 적은 지폐 개수를 사용하도록 한다.
-            int count50000 = 0, count10000 = 0, count5000 = 0, count1000 = 0;
-            int remainingAmount = withdrawalAmount;
-
-            if (remainingAmount >= 50000) { count50000 = remainingAmount / 50000; remainingAmount %= 50000; }
-            if (remainingAmount >= 10000) { count10000 = remainingAmount / 10000; remainingAmount %= 10000; }
-            if (remainingAmount >= 5000) { count5000 = remainingAmount / 5000;   remainingAmount %= 5000; }
-            if (remainingAmount >= 1000) { count1000 = remainingAmount / 1000;   remainingAmount %= 1000; }
-
-            // REQ5.7: 출금 한도를 초과할 경우 에러 메시지 출력 후 종료
-            if (withdrawalAmount > maxWithdrawAmount) {
-                cout << "The maximum amount of cash withdrawal per transaction is KRW " << maxWithdrawAmount << ".\n";
-                return;
+    void displayInventory() const {
+        int countDisplay = 0;
+        cout << "Current Inventory:" << endl;
+        for (int x = 0; x < MAX_NUM_PRODUCT; x++) {
+            if (inventory[x] != nullptr) {
+                cout << "Product: " << inventory[x]->getName()
+                    << " (ID: " << inventory[x]->getId()
+                    << ", Price: $" << inventory[x]->getPrice()
+                    << ")" << endl;
+                countDisplay += 1;
             }
-
-            // REQ5.2: 계좌 잔액 및 ATM 잔액 부족 체크
-            bool isPrimaryBank = (primaryBank == userBank);
-            fee = isPrimaryBank ? 1000 : 2000;  // REQ5.4: 수수료 설정
-            if (withdrawalAmount + fee > account->getBalance()) {
-                cout << "Insufficient funds in your account.\n";
-                return;
-            }
-
-            if (count50000 > cash50000 || count10000 > cash10000 || count5000 > cash5000 || count1000 > cash1000) {
-                cout << "Insufficient cash in the ATM.\n";
-                return;
-            }
-
-            // REQ5.3: 출금 성공 시 계좌 잔액에서 차감 및 ATM 잔액 차감
-            account->setBalance(account->getBalance() - (withdrawalAmount + fee));
-            cash50000 -= count50000;
-            cash10000 -= count10000;
-            cash5000 -= count5000;
-            cash1000 -= count1000;
-
-            cout << "The withdrawal amount is KRW " << withdrawalAmount << " with a fee of KRW " << fee << ".\n";
-            cout << "Would you like to continue?\n1. OK\n2. Cancel (push any key)\n-> ";
-            int confirm;
-            cin >> confirm;
-            if (confirm != 1) {
-                cout << "Withdrawal canceled.\n";
-                return;
-            }
-
-            cout << "Successfully withdrawn!\n";
-            cout << "Remaining balance: KRW " << account->getBalance() << "\n";
-
-            // REQ5.5: 다른 사용자가 사용할 수 있도록 ATM의 잔액을 감소
-            cout << "ATM remaining cash:\n"
-                << "50000: " << cash50000 << ", 10000: " << cash10000
-                << ", 5000: " << cash5000 << ", 1000: " << cash1000 << "\n";
-
-            withdrawalsThisSession++;  // 출금 횟수 증가
-
-            // REQ5.6: 세션당 출금 횟수가 최대치를 초과할 경우 세션 종료
-            if (withdrawalsThisSession >= maxWithdrawalsPerSession) {
-                cout << "The maximum number of withdrawals per session is " << maxWithdrawalsPerSession << ". Please restart another session for more withdrawals.\n";
+            if (countDisplay == num_of_products) {
                 break;
             }
         }
+        cout << "Total items: " << num_of_products << endl;
     }
 
+    int getInventoryCount() const { return num_of_products; }
 
-    void transfer(Account* sourceAccount, Bank* sourceBank, const vector<Bank*>& allBanks) {
-        int transferType;
-        cout << "\n<< Select transfer type >>\n1. Cash transfer\n2. Account transfer\n3. Cancel (push any key)\n-> ";
-        cin >> transferType;
+    State* getNoCoinState() const { return noCoinState; }
+    State* getHasCoinState() const { return hasCoinState; }
+    State* getSoldOutState() const { return soldOutState; }
 
-        if (transferType == 3) {
-            cout << "Transfer canceled.\n";
-            return;
-        }
+    bool hasInsertedCoin() const { return hasCoin; }
+    void setCoinInserted(bool inserted) { hasCoin = inserted; }
+    double getCoinValue() const { return coinValue; }
+    void resetCoinValue() { coinValue = 0.0; }
 
-        // REQ6.2: 목적 계좌 정보 입력
-        string destinationAccountNumber, destinationBankName;
-        cout << "Input destination account number: ";
-        cin >> destinationAccountNumber;
-        cout << "Input destination bank_name: "; //은행 이름 입력 안받고 계좌번호만으로도 알 수 있게 해야할려나
-        cin >> destinationBankName;
-
-        Bank* destinationBank = nullptr;
-        for (Bank* bank : allBanks) {
-            if (bank->getName() == destinationBankName) {
-                destinationBank = bank;
-                break;
-            }
-        }
-
-        if (!destinationBank) {
-            cout << "Destination bank not found. Transfer canceled.\n";
-            return;
-        }
-
-        // Transfer 수수료 설정
-        int transferFee = 0;
-        if (transferType == 1) { // Cash transfer
-            transferFee = 5000; // REQ6.5: Cash transfer 수수료는 5000원
-        }
-        else if (transferType == 2) { // Account transfer
-            transferFee = (sourceBank == destinationBank) ? 2000 : 3000; // REQ6.5: Account transfer 수수료는 은행 간 다름
-        }
-
-        int transferAmount = 0;
-
-        if (transferType == 1) { // Cash transfer
-
-            int cash1000, cash5000, cash10000, cash50000;
-            int command;
-            int insertedAmount;
-
-            do {
-                //cout << "Please, insert cash including the transfer fee (KRW " << transferFee << ")\n";
-                cout << "num of KRW 1000: "; cin >> cash1000;
-                cout << "num of KRW 5000: "; cin >> cash5000;
-                cout << "num of KRW 10000: "; cin >> cash10000;
-                cout << "num of KRW 50000: "; cin >> cash50000;
-
-
-                insertedAmount = cash1000 * 1000 + cash5000 * 5000 + cash10000 * 10000 + cash50000 * 50000;
-                cout << "Please check the total amount of transfer cash : " << insertedAmount << " KRW : 1. yes 2. no\n";
-                cin >> command;
-
-
-            } while (command != 1);
-
-            // ATM 현금 증가 (REQ6.6)
-            this->cash1000 += cash1000;
-            this->cash5000 += cash5000;
-            this->cash10000 += cash10000;
-            this->cash50000 += cash50000;
-
-            // 투입된 현금에서 수수료를 제외한 금액이 목적지 계좌로 전송됨 (REQ6.3)
-            transferAmount = insertedAmount - transferFee;
-            if (transferAmount < 0) {
-                return; //일단 끝내
-            }
-
-        }
-        else if (transferType == 2) { // Account transfer
-            // Account transfer는 원천 계좌에서 금액과 수수료가 차감됨
-            if (sourceAccount->getBalance() < transferAmount + transferFee) {
-                cout << "Not enough funds in your account\n!!Session finished!!\n";
-                return;
-            }
-
-            // 사용자에게 수수료 안내
-            cout << "Your transfer fee is KRW " << transferFee << ". Do you want to transfer?\n1. Yes\n2. Cancel (push any key)\n-> ";
-            int confirm;
-            cin >> confirm;
-            if (confirm != 1) {
-                cout << "Transfer canceled.\n";
-                return;
-            }
-            sourceAccount->setBalance(sourceAccount->getBalance() - transferAmount - transferFee); // REQ6.7: 원천 계좌 잔액 차감
-        }
-
-        // 목적 계좌에 금액 추가
-        Account* destinationAccount = destinationBank->findAccountByNumber(destinationAccountNumber);
-        if (destinationAccount) {
-            destinationAccount->setBalance(destinationAccount->getBalance() + transferAmount);
-            cout << "KRW " << transferAmount << " is successfully transferred to account " << destinationAccountNumber << "!\n";
-            if (transferType == 2) {
-                cout << "There is KRW " << sourceAccount->getBalance() << " in your account.\n";
-            }
-        }
-        else {
-            cout << "Destination account not found. Transfer canceled.\n";
-        }
-    }
-
-
-
-
-    void startSession(const vector<Bank*>& allBanks) {
-        string cardNumber, password;
-        cout << "\nPlease insert your card (Enter Account Number): ";
-        cin >> cardNumber;
-
-        Account* authenticatedAccount = nullptr;
-        Bank* cardBank = nullptr;
-
-
-        cout << "Enter Password: ";
-        cin >> password;
-
-        for (Bank* bank : allBanks) {
-            authenticatedAccount = bank->authenticate(cardNumber, password);
-            if (authenticatedAccount) {
-                cardBank = bank;
-                cout << "Authentication successful. Welcome, " << authenticatedAccount->getUserName() << "!\n";
-                break;
-            }
-        }
-
-        if (!authenticatedAccount) {
-            cout << "Authentication failed. Ending session.\n";
-            return;
-        }
-
-        vector<string> transactions;
-        while (true) {
-            cout << "\nSelect Transaction:\n1. Deposit\n2. Withdraw\n3. Transfer\n4. Exit\n";
-            int choice;
-            cin >> choice;
-
-            if (choice == 4) break;
-
-            // 거래 처리 예시 (입금, 출금, 송금에 대한 간단한 메시지)
-            switch (choice) {
-            case 1:
-                deposit(authenticatedAccount, cardBank);
-                transactions.push_back("Deposit completed.");
-                cout << "Deposit completed.\n";
-                break;
-            case 2:
-                withdraw(authenticatedAccount, cardBank);
-                transactions.push_back("Withdrawal completed.");
-                cout << "Withdrawal completed.\n";
-                break;
-            case 3:
-                transfer(authenticatedAccount, cardBank, allBanks);
-                transactions.push_back("Transfer completed.");
-                cout << "Transfer completed.\n";
-                break;
-            default:
-                cout << "Invalid choice.\n";
-            }
-        }
-
-        if (!transactions.empty()) {
-            cout << "\nTransaction Summary:\n";
-            for (const auto& t : transactions) {
-                cout << "- " << t << "\n";
-            }
-        }
-        else {
-            cout << "\nNo transactions completed in this session.\n";
-        }
-    }
-
-
+    void addCoinValue(double coin) { coinValue += coin; }
 };
 
-
-void displaySnapshot(const vector<Bank>& banks, const vector<ATM>& atms) {
-    cout << "\n\n=====<< Account/ATM Snapshot >>=====\n";
-
-    // Display all ATMs' information
-    cout << "\n[ATM Information - Remaining Cash]\n";
-    for (const auto& atm : atms) {
-        atm.displayRemainingCash();
+//NoCoinState Class
+class NoCoinState : public State {
+public:
+    NoCoinState(VendingMachine* t_machine) : State(t_machine) {
+        s_name = "No Coin";
+        cout << "[Constructor] Constructing State: " << s_name << endl;
     }
 
-    // Display all accounts' information
-    cout << "\n[Account Information - Remaining Balance]\n";
-    for (const auto& bank : banks) {
-        bank.displayAccounts();
+    ~NoCoinState() override {
+        cout << "[Destructor] Destructing State: " << s_name << endl;
     }
-    cout << "=====================================\n";
+    void insertCoin(double coin) override {//main implementation
+        machine->addCoinValue(coin);
+        machine->setState(machine->getHasCoinState());
+        cout << "Coin inserted: " << coin << endl;
+    }
+      
+    void ejectCoin() override {
+        cout << "No coin to eject" << endl;
+    }
+    void dispense(string productName) override {
+        cout << "Insert coin in order to dispense" << endl;
+    }
+    string getName() const override { return this->s_name; }
+};
+
+//HasCoinState class
+class HasCoinState : public State {
+public:
+    HasCoinState(VendingMachine* t_machine) :State(t_machine) {
+        s_name = "Has Coin";
+        cout << "[Constructor] Constructing State: " << s_name << endl;
+    }
+    ~HasCoinState() override {
+        cout << "[Desturctor] Destructing State: " << s_name << endl;
+    }
+    void insertCoin(double coin) override {
+        machine->addCoinValue(coin);
+        cout << "Coin inserted again: " << coin << endl;
+    }
+    void ejectCoin() override {
+        machine->resetCoinValue();
+        machine->setState(machine->getNoCoinState());
+        cout << "Coin ejected" << endl;
+    }
+    string getName() const override { return this->s_name; }
+    //main
+    void dispense(string productName) override { //재고 확인->금액 확인->물품 빼기
+        //재고확인
+        if (!machine->isProductAvailable(productName)) {
+            cout << "Product not available: " << productName << endl;
+            machine->setState(machine->getSoldOutState());
+            return;
+        }
+        double price = machine->getProductPrice(productName);
+
+        if (machine->getCoinValue() < price) {
+            cout << "Insufficient funds. Please insert more coins." << endl;
+            cout << "Current balance : $" << machine->getCoinValue()
+                << ", Required: $" << price << endl;
+            return;
+        }
+        Product* product = machine->removeProduct(productName);
+        machine->addCoinValue(-price);
+        
+        if (machine->getCoinValue() > 0) {
+            cout << "Change returned: $" << machine->getCoinValue() << endl;
+            machine->resetCoinValue();
+        }
+
+        if (machine->getInventoryCount() == 0) {
+            machine->setState(machine->getSoldOutState());
+        }
+        else if (machine->getCoinValue() == 0) {
+            machine->setState(machine->getNoCoinState());
+        }
+        else {
+            machine->setState(machine->getHasCoinState());
+        }
+
+        delete product;
+        
+    }
+};
+
+class SoldOutState : public State {
+public:
+    SoldOutState(VendingMachine* t_machine) :State(t_machine) {
+        s_name = "Sold Out";
+        cout << "[Constructor] Constructing State : " << s_name << endl;
+    }
+    ~SoldOutState() override {
+        cout << "[Destructor] Destructing State: " << s_name << endl;
+    }
+    void insertCoin(double coins) override {
+        cout << "Machine Sold Out. Don't insert more coins." << endl;
+    }
+    void ejectCoin() override {
+        cout << "No coins to eject" << endl;
+    }
+    void dispense(string productName) override {
+        cout << "No product to dispense" << endl;
+    }
+    string getName() const override { return this->s_name; }
+};
+
+VendingMachine::VendingMachine() {
+    cout << "[Constructor] Constructing VendingMachine" << endl;
+    noCoinState = new NoCoinState(this);
+    hasCoinState = new HasCoinState(this);
+    soldOutState = new SoldOutState(this);
+    //init
+    currentState = noCoinState;
+    num_of_products = 0;
+    coinValue = 0.0;
+    for (int x = 0; x < MAX_NUM_PRODUCT; x++) {
+        inventory[x] = nullptr;
+    }
+    printState("Initialization");
 }
 
+void VendingMachine::insertCoin(double coin) {
+    currentState->insertCoin(coin);
+    printState("Insert Coin");
+}
+void VendingMachine::ejectCoin() {
+    currentState->ejectCoin();
+    printState("Eject Coin");
+}
+void VendingMachine::dispense(string productName) {
+    currentState->dispense(productName);
+    printState("Dispense");
+}
+
+
+
+
+
 int main() {
-    // Bank Initializing Step
-    cout << "=====<<Bank Initialization>>=====\n";
-    vector<Bank> banks = { Bank("Kakao"), Bank("Woori"), Bank("Toss") };
-    vector<Bank*> allBanks;
-
-    for (Bank& bank : banks) {
-        cout << "[" << bank.getName() << "] bank created!\n";
-        allBanks.push_back(&bank);
-    }
-
-    // Account Creation Step
-    cout << "\n=====<<Account Creation>>=====\n";
-    string createAccountInput;
-    int accountCount = 1;
-    do {
-        cout << "\nDo you want to create Account " << accountCount++ << "? (yes or no) -> ";
-        cin >> createAccountInput;
-
-        if (createAccountInput == "yes") {
-            string bankName, username, accountNumber, password;
-            int balance;
-            cout << "Bank Name: ";
-            cin >> bankName;
-
-            cout << "User Name: ";
-            cin >> username;
-
-            cout << "Account Number(12digit): ";
-            cin >> accountNumber;
-
-            cout << "Balance(KRW): ";
-            cin >> balance;
-
-            cout << "Password: ";
-            cin >> password;
-
-            // 은행 이름에 따라 계좌 추가
-            bool bankFound = false;
-            for (Bank* bank : allBanks) {
-                if (bank->getName() == bankName) {
-                    bank->addAccount(Account(bankName, username, accountNumber, password, balance));
-                    bankFound = true;
-                    break;
-                }
-            }
-            if (!bankFound) {
-                cout << "Bank not found. Account creation failed.\n";
-            }
-        }
-    } while (createAccountInput == "yes");
-
-    // ATM Creation Step
-    cout << "\n=====<<ATM Creation Step>>=====\n";
-    vector<ATM> atms;
-    string createATMInput;
-    int atmCount = 1;
-    do {
-        cout << "\nDo you want to create ATM " << atmCount++ << "? (yes or no) -> ";
-        cin >> createATMInput;
-
-        if (createATMInput == "yes") {
-            string atmType, primaryBankName, serialNumber, language, adminCardNumber;
-            int cash1000, cash5000, cash10000, cash50000;
-            Bank* primaryBank = nullptr;
-
-            cout << "Primary Bank Name: ";
-            cin >> primaryBankName;
-
-            cout << "Serial Number(6digit): ";
-            cin >> serialNumber;
-
-            // Check for duplicate serialNumber
-            bool isDuplicate = false;
-            for (const ATM& atm : atms) {
-                if (atm.getSerialNumber() == serialNumber) {
-                    cout << "Duplicate serial number detected. ATM creation canceled.\n";
-                    isDuplicate = true;
-                    break;
-                }
-            }
-            if (isDuplicate) continue;
-
-            cout << "Type(Single or Multi): ";
-            cin >> atmType;
-
-            cout << "Language(Uni or Bi): ";
-            cin >> language;
-
-            cout << "1000 Cash ?: ";
-            cin >> cash1000;
-            cout << "5000 Cash?: ";
-            cin >> cash5000;
-            cout << "10000 Cash?: ";
-            cin >> cash10000;
-            cout << "50000 Cash ?: ";
-            cin >> cash50000;
-
-            cout << "Admin card Number: ";
-            cin >> adminCardNumber;
-
-            // Primary bank 찾기
-            if (atmType == "Single") {
-                for (Bank* bank : allBanks) {
-                    if (bank->getName() == primaryBankName) {
-                        primaryBank = bank;
-                        break;
-                    }
-                }
-                if (!primaryBank) {
-                    cout << "Primary bank not found. Skipping ATM creation.\n";
-                    continue;
-                }
-            }
-
-            // ATM 생성 및 추가
-            atms.emplace_back(atmType, primaryBank, serialNumber, language, cash1000, cash5000, cash10000, cash50000, adminCardNumber);
-            cout << "ATM " << atmCount - 1 << " created successfully.\n";
-        }
-    } while (createATMInput == "yes");
-
-    // Program execution loop to check for '/' input
-    string command;
-    while (true) {
-        cout << "\nEnter '/' to display snapshot, 'session' to start an ATM session, or 'exit' to quit: ";
-        cin >> command;
-
-        if (command == "/") {
-            displaySnapshot(banks, atms);
-        }
-        else if (command == "session") {
-            if (atms.empty()) {
-                cout << "No ATMs available. Please create an ATM first.\n";
-            }
-            else {
-                int atmIndex;
-                cout << "Enter ATM index (1 to " << atms.size() << ") to start session: ";
-                cin >> atmIndex;
-
-                if (atmIndex >= 1 && atmIndex <= atms.size()) {
-                    atms[atmIndex - 1].startSession(allBanks);
-                }
-                else {
-                    cout << "Invalid ATM index.\n";
-                }
-            }
-        }
-        else if (command == "exit") {
-            break;
-        }
-    }
-
+    cout << "==========Part 1==========" << endl;
+    VendingMachine machine; //Create a VendingMachine instance
+    Product* p_cola = new Beverage("Cola", 1.50, 330); //Create a new product
+    Product* p_chips = new Snack("Chips", 1.00, 150); //Create a new product
+    Product* p_water = new Beverage("Water", 1.00, 0); //Create a new product
+    
+    cout << "==========Part 2==========" << endl;
+    //Add three products
+    machine.addProduct(p_cola);
+    machine.addProduct(p_chips);
+    machine.addProduct(p_water);
+    //Display inventory
+    machine.displayInventory();
+    /*
+    cout << "==========Part 3==========" << endl;
+    //Insert coin and dispense
+    machine.insertCoin(1.00);
+    machine.insertCoin(0.50);
+    machine.dispense("Cola");
+    cout << "==========Part 4==========" << endl;
+    machine.insertCoin(1.00);
+    machine.dispense("Water");
+    cout << "==========Part 5==========" << endl;
+    machine.insertCoin(0.50);
+    machine.dispense("Chips"); // Should say insufficient funds
+    machine.insertCoin(0.50);
+    machine.dispense("Chips");
+    cout << "==========Part 6==========" << endl;
+    machine.insertCoin(1.00);
+    machine.dispense("Candy"); // Should say product not available
+    machine.displayInventory();
+    cout << "==========Part 7==========" << endl;
+    Product* p_chocolate = new Snack("Chocolate", 1.25, 200);
+    Product* p_juice = new Beverage("Orange Juice", 1.75, 250);
+    machine.addProduct(p_chocolate);
+    machine.addProduct(p_juice);
+    machine.displayInventory();
+    cout << "==========Part 8==========" << endl;
+    machine.insertCoin(2.00);
+    machine.dispense("Chocolate");
+    machine.insertCoin(2.00);
+    machine.dispense("Orange Juice");
+    machine.displayInventory();
     return 0;
+    */
 }
