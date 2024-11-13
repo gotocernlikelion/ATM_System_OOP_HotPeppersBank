@@ -111,7 +111,7 @@ class ATM {
 private:
     string serialNumber; // ATM 시리얼 번호 (REQ1.1)
     string atmType;      // "Single" or "Multi" (REQ1.2)
-    string language; // ATM 언어 설정: English/Bilingual (REQ1.3)
+    string language; // ATM 언어 설정: English/Bilingual (REQ1.3) //uni Bi
     Bank* primaryBank;   // Primary bank associated with the ATM (REQ1.2)
     int cash1000, cash5000, cash10000, cash50000;
     string adminCardNumber; //adm card면 접근(REQ1.9)
