@@ -71,8 +71,7 @@ private:
     unordered_map<string, Account> accounts;
 
 public:
-    Bank(string bankName) : name(bankName) {}
-
+    Bank(const string& bankName) : name(bankName) {}
     string getName() const { return name; }
 
     void addAccount(const Account& account) {
@@ -569,18 +568,30 @@ void displaySnapshot(const vector<Bank>& banks, const vector<ATM>& atms) {
     }
     cout << "=====================================\n";
 }
-
 int main() {
     // Bank Initializing Step
     cout << "=====<<Bank Initialization>>=====\n";
-    vector<Bank> banks = { Bank("Kakao"), Bank("Woori"), Bank("Toss") };
+    vector<Bank> banks;
     vector<Bank*> allBanks;
+    string bankInput;
 
-    for (Bank& bank : banks) {
-        cout << "[" << bank.getName() << "] bank created!\n";
-        allBanks.push_back(&bank);
+    banks.reserve(100);
+
+
+    // 사용자로부터 은행 이름을 반복적으로 입력받아 초기화
+    while (true) {
+        cout << "Enter bank name (or type 'done' to finish): ";
+        cin >> bankInput;
+
+        if (bankInput == "done") break; // 'done' 입력 시 은행 초기화 종료
+
+        Bank newBank(bankInput); // 새로운 Bank 객체 생성
+        banks.push_back(newBank); // banks 벡터에 추가
+        allBanks.push_back(&banks.back()); // 포인터 벡터에도 추가
+        cout << "[" << bankInput << "] bank created!\n";
     }
 
+ 
     // Account Creation Step
     cout << "\n=====<<Account Creation>>=====\n";
     string createAccountInput;
@@ -639,25 +650,28 @@ int main() {
             cout << "Primary Bank Name: ";
             cin >> primaryBankName;
 
-            cout << "Serial Number(6-digit): ";
-            cin >> serialNumber;
+            // Loop to ensure unique 6-digit serial number
+            bool isDuplicate;
+            do {
+                cout << "Serial Number(6-digit): ";
+                cin >> serialNumber;
 
-            // Check if serial number is exactly 6 digits
-            if (serialNumber.length() != 6) {
-                cout << "Invalid serial number. It must be exactly 6 digits. ATM creation canceled.\n";
-                continue;
-            }
-
-            // Check for duplicate serialNumber
-            bool isDuplicate = false;
-            for (const ATM& atm : atms) {
-                if (atm.getSerialNumber() == serialNumber) {
-                    cout << "Duplicate serial number detected. ATM creation canceled.\n";
-                    isDuplicate = true;
-                    break;
+                // Check if serial number is exactly 6 digits
+                if (serialNumber.length() != 6) {
+                    cout << "Invalid serial number. It must be exactly 6 digits.\n";
+                    continue;  // Prompt for serial number again
                 }
-            }
-            if (isDuplicate) continue;
+
+                // Check for duplicate serialNumber
+                isDuplicate = false;
+                for (const ATM& atm : atms) {
+                    if (atm.getSerialNumber() == serialNumber) {
+                        cout << "Duplicate serial number detected. Please enter a unique serial number.\n";
+                        isDuplicate = true;
+                        break;
+                    }
+                }
+            } while (isDuplicate);
 
             cout << "Type(Single or Multi): ";
             cin >> atmType;
@@ -699,6 +713,7 @@ int main() {
             atmCount++;
         }
     } while (createATMInput == "yes");
+
 
 
     // Program execution loop to check for '/' input
