@@ -168,37 +168,31 @@ public:
 
         bool isCashDeposit = (depositType == 1);
         bool isCheckDeposit = (depositType == 2);
-        bool requiresFee = (primaryBank != userBank);  // Primary Bank 여부 확인
-        int fee = 0;
+        bool requiresFee = (primaryBank != userBank); // 주은행 여부 확인
+        int fee = requiresFee ? 2000 : 1000;         // 수수료 설정
 
-        // 수수료 설정 (REQ1.8)
-        if (isCashDeposit) {
-            fee = requiresFee ? 2000 : 1000;  // non-primary: 2000원, primary: 1000원
+        cout << "Deposit fee is KRW " << fee << ". Would you like to pay the fee?\n";
+        cout << "1. Yes\n2. Cancel (push any key)\n-> ";
+        int confirm;
+        cin >> confirm;
+
+        if (confirm != 1) {
+            cout << "Deposit canceled.\n";
+            return;
         }
-        else if (isCheckDeposit) {
-            fee = 1000;
+
+        // 수수료 반영
+        if (fee == 1000) {
+            cash1000++; // 수수료 1000원 지폐 1장 추가
+            cout << "Fee of KRW 1,000 has been accepted.\n";
+        }
+        else if (fee == 2000) {
+            cash1000 += 2; // 수수료 2000원 지폐 2장 추가
+            cout << "Fee of KRW 2,000 has been accepted.\n";
         }
 
-
         if (isCashDeposit) {
-            // 수수료 안내
-            if (fee > 0) {
-                cout << "Deposit fee is KRW " << fee << ". Please insert an additional bill for the fee.\n";
-            }
-            else {
-                cout << "You don't have deposit fee.\n";
-            }
-
-            // 예치 수수료 확인
-            cout << "1. OK\n2. Cancel (push any key)\n-> ";
-            int confirm;
-            cin >> confirm;
-            if (confirm != 1) {
-                cout << "Deposit canceled.\n";
-                return;
-            }
-
-            // 입금 지폐 수량 입력 및 제한 확인
+            // 입금할 금액 입력
             int count1000, count5000, count10000, count50000;
             int totalBills = 0;
 
@@ -218,43 +212,33 @@ public:
             cin >> count50000;
             totalBills += count50000;
 
-            // 지폐 수량 제한 (REQ4.2)
+            // 지폐 수량 제한 확인
             const int limit = 50;
             if (totalBills > limit) {
                 cout << "You cannot insert over " << limit << " papers.\n!!Session finished!!\n";
                 return;
             }
-            // 총 입금 금액 계산 (REQ4.3)
+
+            // 총 입금 금액 계산
             int depositAmount = count1000 * 1000 + count5000 * 5000 + count10000 * 10000 + count50000 * 50000;
 
-            // 수수료 차감
-            if (fee > 0) {
-                if (depositAmount < fee) {
-                    cout << "Insufficient amount for the fee. Deposit canceled.\n";
-                    return;
-                }
-                depositAmount -= fee;
-            }
-
-
-            cout << "The deposit amount is KRW " << depositAmount << "\nWould you like to continue?\n1. OK\n2. Cancel (push any key)\n-> ";
+            cout << "The deposit amount is KRW " << depositAmount << "\nWould you like to continue?\n1. Yes\n2. Cancel (push any key)\n-> ";
             cin >> confirm;
             if (confirm != 1) {
                 cout << "Deposit canceled.\n";
                 return;
             }
 
-            // 입금 금액을 계좌 잔액에 반영
+            // 계좌 잔액 반영
             account->setBalance(account->getBalance() + depositAmount);
             cout << "Successfully deposited!\nThere is KRW " << account->getBalance() << " in your account.\n";
 
-            // 현금 입금 시 ATM 현금 잔액 반영 (REQ4.5, REQ4.6)
+            // ATM 현금 보유량 반영
             cash1000 += count1000;
             cash5000 += count5000;
             cash10000 += count10000;
             cash50000 += count50000;
         }
-
 
         else if (isCheckDeposit) {
             int paperNum = 0;
@@ -264,38 +248,28 @@ public:
             cin >> paperNum;
 
             if (paperNum > 30) {
-                cout << "you cannot insert over 30 papers" << endl;
+                cout << "You cannot insert over 30 papers" << endl;
                 return;
             }
 
-            cout << "There is KRW " << account->getBalance() << " in your account\n" << endl;
-            cout << "You should pay extra KRW 1,000 for deposit fee." << endl;
-
-            cout << "Would you like to continue ?\n1. OK\n 2. Cancle (push any key)" << endl;
-            cin >> checkContinue;
-
-            if (checkContinue != 1) {
-                cout << "Session finish" << endl;
-                return;
-            }
             for (int i = 0; i < paperNum; i++) {
-                cout << "How much will you deposit with your Check?" << endl;
-                cin >> CheckValue;
-                account->setBalance(account->getBalance() + CheckValue);
+                while (true) {
+                    cout << "Check #" << (i + 1) << ": How much will you deposit with your check? (Minimum amount is 100,000 KRW)" << endl;
+                    cin >> CheckValue;
+
+                    if (CheckValue >= 100000) {
+                        account->setBalance(account->getBalance() + CheckValue);
+                        break;
+                    }
+                    else {
+                        cout << "Invalid amount. Please enter a value of 100,000 KRW or more." << endl;
+                    }
+                }
             }
             cout << "Successfully deposited!\nThere is KRW " << account->getBalance() << " in your account.\n";
         }
-
-
-
-
-        // if (isCashDeposit) {
-
-        // }
-        // else {
-        //     cout << "(Note: Check deposits do not affect ATM cash availability.)\n";
-        // }
     }
+
 
 
     void withdraw(Account* account, Bank* userBank) {
@@ -404,7 +378,7 @@ public:
         // Transfer 수수료 설정
         int transferFee = 0;
         if (transferType == 1) { // Cash transfer
-            transferFee = 5000; // REQ6.5: Cash transfer 수수료는 5000원
+            transferFee = 1000; // REQ6.5: Cash transfer 수수료는 1000원
         }
         else if (transferType == 2) { // Account transfer
             transferFee = (sourceBank == destinationBank) ? 2000 : 3000; // REQ6.5: Account transfer 수수료는 은행 간 다름
@@ -418,34 +392,52 @@ public:
             int command;
             int insertedAmount;
 
+            // Prompt user to confirm inserting the transfer fee first
+            cout << "A transfer fee of KRW " << transferFee << " will be deducted.\n";
+            cout << "1. OK\n2. Cancel\n-> ";
+            cin >> command;
+
+            if (command == 2) {
+                cout << "Transaction canceled.\n";
+                return; // End the process if user cancels
+            }
+
+            cout << "Transfer fee accepted. Please insert cash for the transfer.\n";
+
             do {
-                //cout << "Please, insert cash including the transfer fee (KRW " << transferFee << ")\n";
+                // Prompt user to insert cash
                 cout << "num of KRW 1000: "; cin >> cash1000;
                 cout << "num of KRW 5000: "; cin >> cash5000;
                 cout << "num of KRW 10000: "; cin >> cash10000;
                 cout << "num of KRW 50000: "; cin >> cash50000;
 
-
+                // Calculate total inserted cash
                 insertedAmount = cash1000 * 1000 + cash5000 * 5000 + cash10000 * 10000 + cash50000 * 50000;
-                cout << "Please check the total amount of transfer cash : " << insertedAmount << " KRW : 1. yes 2. no\n";
-                cin >> command;
 
+                cout << "Please check the total amount of transfer cash: " << insertedAmount << " KRW\n";
+                cout << "1. Confirm\n2. Re-enter cash\n-> ";
+                cin >> command;
 
             } while (command != 1);
 
-            // ATM 현금 증가 (REQ6.6)
-            this->cash1000 += cash1000;
+            // ATM cash update (REQ6.6)
+            this->cash1000 += (cash1000 + 1);
             this->cash5000 += cash5000;
             this->cash10000 += cash10000;
             this->cash50000 += cash50000;
 
-            // 투입된 현금에서 수수료를 제외한 금액이 목적지 계좌로 전송됨 (REQ6.3)
+            // Deduct transfer fee from inserted cash
             transferAmount = insertedAmount - transferFee;
+
+            // Check if sufficient funds are available after deducting fee
             if (transferAmount < 0) {
-                return; //일단 끝내
+                cout << "Insufficient funds to cover the transfer fee. Transaction canceled.\n";
+                return; // End process
             }
 
+            cout << "Transfer of " << transferAmount << " KRW successfully completed.\n";
         }
+
         else if (transferType == 2) { // Account transfer
             // Account transfer는 원천 계좌에서 금액과 수수료가 차감됨
             if (sourceAccount->getBalance() < transferAmount + transferFee) {
@@ -591,11 +583,13 @@ int main() {
         cout << "[" << bankInput << "] bank created!\n";
     }
 
- 
+
     // Account Creation Step
     cout << "\n=====<<Account Creation>>=====\n";
     string createAccountInput;
     int accountCount = 1;
+    vector<string> accountNumbers;
+
     do {
         cout << "\nDo you want to create Account " << accountCount++ << "? (yes or no) -> ";
         cin >> createAccountInput;
@@ -609,8 +603,33 @@ int main() {
             cout << "User Name: ";
             cin >> username;
 
-            cout << "Account Number(12digit): ";
-            cin >> accountNumber;
+
+            while (true) {
+                cout << "Account Number (12 digits): ";
+                cin >> accountNumber;
+
+                bool validAccountNumber = true;
+
+                if (accountNumber.length() != 12) {
+                    cout << "Invalid account number. It must be exactly 12 digits.\n";
+                    validAccountNumber = false;
+                }
+
+                // 기존의 accountNumbers에 중복된 번호가 있는지 확인
+                for (const string& name : accountNumbers) {
+                    if (accountNumber == name) {
+                        validAccountNumber = false;
+                        cout << "This account number is already taken. Please enter a different number.\n";
+                        break;
+                    }
+                }
+
+                if (validAccountNumber) {
+                    accountNumbers.push_back(accountNumber);
+                    // cout << "Account number " << accountNumber << " has been successfully added.\n";
+                    break;
+                }
+            }
 
             cout << "Balance(KRW): ";
             cin >> balance;
