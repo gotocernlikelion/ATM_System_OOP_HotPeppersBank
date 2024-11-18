@@ -2,21 +2,20 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-
+#include <fstream>
 using namespace std;
 
 class Transaction {
 public:
     static int transaction_counter; // 각 거래의 고유 ID (REQ2.4)
-    int transaction_id;
-    string type;
+    int transactionID;
+    string cardNumber;
+    string transactionType;
     int amount;
+    string additionalInfo;
 
-    Transaction(const string& type, int amount) {
-        transaction_id = transaction_counter++;
-        this->type = type;
-        this->amount = amount;
-    }
+    Transaction(int id, const string& card, const string& type, int amt, const string& info = "")
+        : transactionID(id), cardNumber(card), transactionType(type), amount(amt), additionalInfo(info) {}
 };
 
 int Transaction::transaction_counter = 1;
@@ -114,15 +113,17 @@ private:
     string language; // ATM 언어 설정: English/Bilingual (REQ1.3) //uni Bi
     Bank* primaryBank;   // Primary bank associated with the ATM (REQ1.2)
     int cash1000, cash5000, cash10000, cash50000;
-    string adminCardNumber; //adm card면 접근(REQ1.9)
+    string adminCardNumber = "0000"; //adm card면 접근(REQ1.9)
 
     vector<Transaction> session_transactions; // 세션 중 수행된 거래들 (REQ2.3)
     bool session_active = false;              // 세션 상태 표시 (REQ2.1, REQ2.2)
 
+    vector<Transaction> allTransactions; //11.18 20:57
+
 public:
-    ATM(string type, Bank* bank, string serial, string lang, int c1000, int c5000, int c10000, int c50000, string adminCard)
+    ATM(string type, Bank* bank, string serial, string lang, int c1000, int c5000, int c10000, int c50000)
         : atmType(type), primaryBank(bank), serialNumber(serial), language(lang),
-        cash1000(c1000), cash5000(c5000), cash10000(c10000), cash50000(c50000), adminCardNumber(adminCard) {}
+        cash1000(c1000), cash5000(c5000), cash10000(c10000), cash50000(c50000) {}
 
     string getSerialNumber() const {
         return serialNumber;
@@ -507,6 +508,10 @@ public:
         cout << "\nPlease insert your card (Enter Account Number): ";
         cin >> cardNumber;
 
+        if (cardNumber == adminCardNumber) {
+            return startAdminSession();
+        }
+
         cout << "Enter Password: ";
         cin >> password;
 
@@ -572,7 +577,56 @@ public:
             }
         }
     }
+    void startAdminSession() {
+        string command;
+        cout << "Admin session started. Displaying Transaction History menu.\n";
+        cout << "Do you want to view Transaction History? (JJass or yes) :";
+        cin >> command;
+        if (command == "JJass" || command == "yes") {
+            displayTransactionHistory();
+        }
+        else {
+            return;
+        }
+    }
+
+    //11/18 20:41
+    void addTransaction(int id, const string& card, const string& type, int amt, const string& info = "") {
+        allTransactions.push_back(Transaction(id, card, type, amt, info));
+    }
+
+    void displayTransactionHistory() {
+        cout << "\n===== Transaction History =====\n";
+        for (const auto& transaction : allTransactions) {
+            cout << "ID: " << transaction.transactionID
+                << ", Card: " << transaction.cardNumber
+                << ", Type: " << transaction.transactionType
+                << ", Amount: " << transaction.amount;
+            if (!transaction.additionalInfo.empty()) {
+                cout << ", Info: " << transaction.additionalInfo;
+            }
+            cout << endl;
+        }
+
+        // 외부 파일에 거래 내역 저장
+        ofstream outFile("transaction_history.txt");
+        for (const auto& transaction : allTransactions) {
+            outFile << "ID: " << transaction.transactionID
+                << ", Card: " << transaction.cardNumber
+                << ", Type: " << transaction.transactionType
+                << ", Amount: " << transaction.amount;
+            if (!transaction.additionalInfo.empty()) {
+                outFile << ", Info: " << transaction.additionalInfo;
+            }
+            outFile << endl;
+        }
+        outFile.close();
+        cout << "Transaction history saved to transaction_history.txt\n";
+    }
+
 };
+
+    
 
 
 void displaySnapshot(const vector<Bank>& banks, const vector<ATM>& atms) {
@@ -608,7 +662,16 @@ int main() {
         cout << "Enter bank name (or type 'done' to finish): ";
         cin >> bankInput;
 
-        if (bankInput == "done") return 1; // 'done' 입력 시 은행 초기화 종료
+        if (bankInput == "done") {
+            if (banks.empty()) { // Bank가 하나도 생성되지 않았을 때 프로그램 종료
+                cout << "No banks created. Exiting program.\n";
+                return 0;
+            }
+            else {
+                cout << "Bank initialization complete. Proceeding to account creation...\n";
+                break; // Bank가 최소 하나 이상 생성된 경우 다음 단계로 이동
+            }
+        }
 
         Bank newBank(bankInput); // 새로운 Bank 객체 생성
         banks.push_back(newBank); // banks 벡터에 추가
@@ -630,8 +693,21 @@ int main() {
         if (createAccountInput == "yes") {
             string bankName, username, accountNumber, password;
             int balance;
+            // Bank 이름 입력
+            bool bankFound = false;
             cout << "Bank Name: ";
-            cin >> bankName;
+            while (!bankFound) {
+                cin >> bankName;
+                for (Bank* bank : allBanks) { //Bank 있는거냐?
+                    if (bank->getName() == bankName) {
+                        bankFound = true;
+                        break;
+                    }
+                }
+                if (!bankFound) {
+                    cout << "Bank not found. Please type again: ";
+                }
+            }
 
             cout << "User Name: ";
             cin >> username;
@@ -671,7 +747,7 @@ int main() {
             cin >> password;
 
             // 은행 이름에 따라 계좌 추가
-            bool bankFound = false;
+            //bool bankFound = false;
             for (Bank* bank : allBanks) {
                 if (bank->getName() == bankName) {
                     bank->addAccount(Account(bankName, username, accountNumber, password, balance));
@@ -695,7 +771,7 @@ int main() {
         cin >> createATMInput;
 
         if (createATMInput == "yes") {
-            string atmType, primaryBankName, serialNumber, language, adminCardNumber;
+            string atmType, primaryBankName, serialNumber, language;
             int cash1000, cash5000, cash10000, cash50000;
             Bank* primaryBank = nullptr;
 
@@ -740,9 +816,6 @@ int main() {
             cout << "50000 Cash ?: ";
             cin >> cash50000;
 
-            cout << "Admin card Number: ";
-            cin >> adminCardNumber;
-
             // Find the primary bank
             if (atmType == "Single") {
                 for (Bank* bank : allBanks) {
@@ -758,7 +831,7 @@ int main() {
             }
 
             // Create and add the ATM
-            atms.emplace_back(atmType, primaryBank, serialNumber, language, cash1000, cash5000, cash10000, cash50000, adminCardNumber);
+            atms.emplace_back(atmType, primaryBank, serialNumber, language, cash1000, cash5000, cash10000, cash50000);
             cout << "ATM " << atmCount << " created successfully.\n";
 
             // Increment atmCount only on successful creation
