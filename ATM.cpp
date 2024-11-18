@@ -591,6 +591,8 @@ void displaySnapshot(const vector<Bank>& banks, const vector<ATM>& atms) {
     }
     cout << "=====================================\n";
 }
+
+
 int main() {
     // Bank Initializing Step
     cout << "=====<<Bank Initialization>>=====\n";
@@ -606,7 +608,7 @@ int main() {
         cout << "Enter bank name (or type 'done' to finish): ";
         cin >> bankInput;
 
-        if (bankInput == "done") break; // 'done' 입력 시 은행 초기화 종료
+        if (bankInput == "done") return 1; // 'done' 입력 시 은행 초기화 종료
 
         Bank newBank(bankInput); // 새로운 Bank 객체 생성
         banks.push_back(newBank); // banks 벡터에 추가
