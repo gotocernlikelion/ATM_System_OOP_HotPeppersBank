@@ -525,11 +525,30 @@ public:
 
     void startSession(const vector<Bank*>& allBanks) {
         string cardNumber, password;
-        cout << "\nPlease insert your card (Enter Account Number): ";
-        cin >> cardNumber;
 
-        if (cardNumber == adminCardNumber) {
-            return startAdminSession();
+        while (true) {
+            cout << "\nPlease insert your card (Enter Account Number): ";
+            cin >> cardNumber;
+
+            if (cardNumber == adminCardNumber) {
+                return startAdminSession();
+            }
+
+            // Check if account exists in any bank
+            bool accountExists = false;
+            for (Bank* bank : allBanks) {
+                if (bank->findAccountByNumber(cardNumber)) {
+                    accountExists = true;
+                    break;
+                }
+            }
+            // 존재하지 않는 번호를 입력했을 때 다시 입력하라 맨이야 -JH- 
+            if (!accountExists) {
+                cout << "There's no account of that number. Please type again.\n";
+            }
+            else {
+                break;
+            }
         }
 
         cout << "Enter Password: ";
@@ -799,19 +818,27 @@ int main() {
             cin >> primaryBankName;
 
             // Loop to ensure unique 6-digit serial number
-            bool isDuplicate;
+            bool isDuplicate{ false };
             do {
-                cout << "Serial Number(6-digit): ";
-                cin >> serialNumber;
+                bool serial_is_6digits{ false };
 
-                // Check if serial number is exactly 6 digits
-                if (serialNumber.length() != 6) {
-                    cout << "Invalid serial number. It must be exactly 6 digits.\n";
-                    continue;  // Prompt for serial number again
-                }
+                while (!serial_is_6digits) { // 6 자리 넘지 않으면 while 을 빠져나갈수가 없으셈 ㅇㅇ. - JH- 
+                    cout << "Serial Number(6-digit): ";
+                    cin >> serialNumber;
+                    // Check if serial number is exactly 6 digits
+                    if (serialNumber.length() != 6) {
+                        cout << "Invalid serial number. It must be exactly 6 digits.\n";
+                        continue;  
+                       // Prompt for serial number again
+                    
+                    }
+                    else {
+                        serial_is_6digits=true;
+                    }
+                };
 
                 // Check for duplicate serialNumber
-                isDuplicate = false;
+                /*isDuplicate = false;*/
                 for (const ATM& atm : atms) {
                     if (atm.getSerialNumber() == serialNumber) {
                         cout << "Duplicate serial number detected. Please enter a unique serial number.\n";
