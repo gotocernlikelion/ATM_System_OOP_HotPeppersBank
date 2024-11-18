@@ -243,6 +243,13 @@ public:
             // 총 입금 금액 계산
             int depositAmount = count1000 * 1000 + count5000 * 5000 + count10000 * 10000 + count50000 * 50000;
 
+            if (depositAmount == 0) {
+                cout << "Deposit amount is 0. Fee will be refunded.\n";
+                cash1000 -= (fee / 1000); // 수수료 환불
+                cout << "Fee of KRW " << fee << " has been refunded.\n";
+                return;
+            }
+
             cout << "The deposit amount is KRW " << depositAmount << "\nWould you like to continue?\n1. Yes\n2. Cancel (push any key)\n-> ";
             cin >> confirm;
             if (confirm != 1) {
@@ -259,12 +266,15 @@ public:
             cash5000 += count5000;
             cash10000 += count10000;
             cash50000 += count50000;
+
+            addTransaction(Transaction::transaction_counter++, account->getAccountNumber(), "Deposit", depositAmount, ""); //11.18 21:36
         }
 
         else if (isCheckDeposit) {
             int paperNum = 0;
             int checkContinue;
             int CheckValue;
+            int depositAmount = 0;
             cout << "How many check papers will you deposit? (30 papers limit)" << endl;
             cin >> paperNum;
 
@@ -279,7 +289,8 @@ public:
                     cin >> CheckValue;
 
                     if (CheckValue >= 100000) {
-                        account->setBalance(account->getBalance() + CheckValue);
+                        //account->setBalance(account->getBalance() + CheckValue);
+                        depositAmount += CheckValue;
                         break;
                     }
                     else {
@@ -287,7 +298,9 @@ public:
                     }
                 }
             }
+            account->setBalance(account->getBalance() + depositAmount);
             cout << "Successfully deposited!\nThere is KRW " << account->getBalance() << " in your account.\n";
+            addTransaction(Transaction::transaction_counter++, account->getAccountNumber(), "Deposit", depositAmount, ""); //
         }
     }
 
@@ -358,6 +371,7 @@ public:
 
             cout << "Successfully withdrawn!\n";
             cout << "Remaining balance: KRW " << account->getBalance() << "\n";
+            addTransaction(Transaction::transaction_counter++, account->getAccountNumber(), "Withdraw", withdrawalAmount, ""); //11.18 21:49
 
             // REQ5.5: 다른 사용자가 사용할 수 있도록 ATM의 잔액을 감소
             cout << "ATM remaining cash:\n"
@@ -466,9 +480,15 @@ public:
             }
 
             cout << "Transfer of " << transferAmount << " KRW successfully completed.\n";
+            addTransaction(Transaction::transaction_counter++, sourceAccount->getAccountNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber);
         }
 
         else if (transferType == 2) { // Account transfer
+      
+
+            cout << "How much do you want to transfer? : ";
+            cin >> transferAmount;
+                 
             // Account transfer는 원천 계좌에서 금액과 수수료가 차감됨
             if (sourceAccount->getBalance() < transferAmount + transferFee) {
                 cout << "Not enough funds in your account\n!!Session finished!!\n";
@@ -493,13 +513,13 @@ public:
             cout << "KRW " << transferAmount << " is successfully transferred to account " << destinationAccountNumber << "!\n";
             if (transferType == 2) {
                 cout << "There is KRW " << sourceAccount->getBalance() << " in your account.\n";
+                addTransaction(Transaction::transaction_counter++, sourceAccount->getAccountNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber); //11.18 21:52
             }
         }
         else {
             cout << "Destination account not found. Transfer canceled.\n";
         }
     }
-
 
 
 
