@@ -128,44 +128,44 @@ public:
         return serialNumber;
     }
 
-    bool authenticateUser(const vector<Bank*>& allBanks, const string& accountNumber,  string& password) {
-    int attemptCount = 0;
-    while (attemptCount < 3) {
-        if (atmType == "Single") {
-            Account* account = primaryBank->authenticate(accountNumber, password);
-            if (account) {
-                cout << "User authorized for Single-Bank ATM in " << primaryBank->getName() << " Bank." << endl;
-                return true;
-            }
-            else if (primaryBank->findAccountByNumber(accountNumber)) {
-                // primary bank에 계좌는 있지만 비밀번호가 틀린 경우
-                cout << "Wrong password. Please try again (" << 3 - attemptCount - 1 << " attempts remaining).\n";
-            }
-            else {
-                cout << "Invalid Card. Primary Bank of ATM: " << primaryBank->getName() << endl;
-                return false;
-            }
-        }
-        else if (atmType == "Multi") {
-            for (Bank* bank : allBanks) {
-                Account* account = bank->authenticate(accountNumber, password);
+    bool authenticateUser(const vector<Bank*>& allBanks, const string& accountNumber, string& password) {
+        int attemptCount = 0;
+        while (attemptCount < 3) {
+            if (atmType == "Single") {
+                Account* account = primaryBank->authenticate(accountNumber, password);
                 if (account) {
-                    cout << "User authorized for Multi-Bank ATM. Access granted for " << bank->getName() << " Bank." << endl;
+                    cout << "User authorized for Single-Bank ATM in " << primaryBank->getName() << " Bank." << endl;
                     return true;
                 }
+                else if (primaryBank->findAccountByNumber(accountNumber)) {
+                    // primary bank에 계좌는 있지만 비밀번호가 틀린 경우
+                    cout << "Wrong password. Please try again (" << 3 - attemptCount - 1 << " attempts remaining).\n";
+                }
+                else {
+                    cout << "Invalid Card. Primary Bank of ATM: " << primaryBank->getName() << endl;
+                    return false;
+                }
             }
-            cout << "Authorization failed. Please try again (" << 3 - attemptCount - 1 << " attempts remaining).\n";
-        }
+            else if (atmType == "Multi") {
+                for (Bank* bank : allBanks) {
+                    Account* account = bank->authenticate(accountNumber, password);
+                    if (account) {
+                        cout << "User authorized for Multi-Bank ATM. Access granted for " << bank->getName() << " Bank." << endl;
+                        return true;
+                    }
+                }
+                cout << "Authorization failed. Please try again (" << 3 - attemptCount - 1 << " attempts remaining).\n";
+            }
 
-        attemptCount++;
-        if (attemptCount < 3) {
-            cout << "Enter Password again: ";
-            cin >> password;
+            attemptCount++;
+            if (attemptCount < 3) {
+                cout << "Enter Password again: ";
+                cin >> password;
+            }
         }
+        cout << "Too many failed attempts. Session terminated.\n";
+        return false;
     }
-    cout << "Too many failed attempts. Session terminated.\n";
-    return false;
-}
 
 
     void displayRemainingCash() const {
@@ -298,6 +298,15 @@ public:
         int withdrawalsThisSession = 0;          // 세션당 출금 횟수를 카운트할 변수
 
         while (withdrawalsThisSession < maxWithdrawalsPerSession) {
+            cout << "\nWould you like to proceed with a withdrawal?\n1. Yes\n2. No (End withdrawal session)\n-> ";
+            int proceed;
+            cin >> proceed;
+
+            if (proceed != 1) {
+                cout << "Withdrawal session ended.\n";
+                return; // 사용자가 출금을 원하지 않으면 함수 종료
+            }
+
             int withdrawalAmount, fee = 0;
             cout << "Enter amount to withdraw: ";
             cin >> withdrawalAmount;
@@ -619,8 +628,21 @@ int main() {
         if (createAccountInput == "yes") {
             string bankName, username, accountNumber, password;
             int balance;
+            // Bank 이름 입력
+            bool bankFound = false;
             cout << "Bank Name: ";
-            cin >> bankName;
+            while (!bankFound) {
+                cin >> bankName;
+                for (Bank* bank : allBanks) { //Bank 있는거냐?
+                    if (bank->getName() == bankName) {
+                        bankFound = true;
+                        break;
+                    }
+                }
+                if (!bankFound) {
+                    cout << "Bank not found. Please type again: ";
+                }
+            }
 
             cout << "User Name: ";
             cin >> username;
@@ -660,7 +682,7 @@ int main() {
             cin >> password;
 
             // 은행 이름에 따라 계좌 추가
-            bool bankFound = false;
+            //bool bankFound = false;
             for (Bank* bank : allBanks) {
                 if (bank->getName() == bankName) {
                     bank->addAccount(Account(bankName, username, accountNumber, password, balance));
