@@ -504,16 +504,34 @@ public:
 
     void startSession(const vector<Bank*>& allBanks) {
         string cardNumber, password;
-        cout << "\nPlease insert your card (Enter Account Number): ";
-        cin >> cardNumber;
+        Account* authenticatedAccount = nullptr;
+        Bank* cardBank = nullptr;
+
+        while (true) {
+            cout << "\nPlease insert your card (Enter Account Number): ";
+            cin >> cardNumber;
+
+            // Check if account exists in any bank
+            bool accountExists = false;
+            for (Bank* bank : allBanks) {
+                if (bank->findAccountByNumber(cardNumber)) {
+                    accountExists = true;
+                    break;
+                }
+            }
+            // 존재하지 않는 번호를 입력했을 때 다시 입력하라 맨이야 -JH- 
+            if (!accountExists) {
+                cout << "There's no account of that number. Please type again.\n";
+            }
+            else {
+                break;
+            }
+        }
 
         cout << "Enter Password: ";
         cin >> password;
 
         if (authenticateUser(allBanks, cardNumber, password)) {
-            Account* authenticatedAccount = nullptr;
-            Bank* cardBank = nullptr;
-
             // 계좌 인증 후 은행 찾기
             for (Bank* bank : allBanks) {
                 authenticatedAccount = bank->authenticate(cardNumber, password);
@@ -522,11 +540,6 @@ public:
                     cout << "Authentication successful. Welcome, " << authenticatedAccount->getUserName() << "!\n";
                     break;
                 }
-            }
-
-            if (!authenticatedAccount) {
-                cout << "Authentication failed. Ending session.\n";
-                return;
             }
 
             vector<string> transactions;
@@ -554,8 +567,6 @@ public:
                     transactions.push_back("Transfer completed.");
                     cout << "Transfer completed.\n";
                     break;
-                case 4:
-                    break;
                 default:
                     cout << "Invalid choice.\n";
                 }
@@ -570,6 +581,9 @@ public:
             else {
                 cout << "\nNo transactions completed in this session.\n";
             }
+        }
+        else {
+            cout << "Session terminated due to failed authentication.\n";
         }
     }
 };
@@ -714,19 +728,21 @@ int main() {
             cin >> primaryBankName;
 
             // Loop to ensure unique 6-digit serial number
-            bool isDuplicate;
+            bool isDuplicate{ false };
             do {
-                cout << "Serial Number(6-digit): ";
-                cin >> serialNumber;
-
-                // Check if serial number is exactly 6 digits
-                if (serialNumber.length() != 6) {
-                    cout << "Invalid serial number. It must be exactly 6 digits.\n";
-                    continue;  // Prompt for serial number again
-                }
-
+                bool serial_is_6digits{ false };
+                    while (!serial_is_6digits) { // 6 자리 넘지 않으면 while 을 빠져나갈수가 없으셈 ㅇㅇ. - JH- 
+                        cout << "Serial Number(6-digit): ";
+                        cin >> serialNumber;
+                        // Check if serial number is exactly 6 digits
+                        if (serialNumber.length() != 6) {
+                            cout << "Invalid serial number. It must be exactly 6 digits.\n";
+                            continue;  // Prompt for serial number again
+                        }
+                    };
+              
                 // Check for duplicate serialNumber
-                isDuplicate = false;
+                //isDuplicate = false;
                 for (const ATM& atm : atms) {
                     if (atm.getSerialNumber() == serialNumber) {
                         cout << "Duplicate serial number detected. Please enter a unique serial number.\n";
