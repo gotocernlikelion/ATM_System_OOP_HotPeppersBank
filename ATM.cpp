@@ -15,7 +15,8 @@ public:
     string additionalInfo;
 
     Transaction(int id, const string& card, const string& type, int amt, const string& info = "")
-        : transactionID(id), cardNumber(card), transactionType(type), amount(amt), additionalInfo(info) {}
+        : transactionID(id), cardNumber(card), transactionType(type), amount(amt), additionalInfo(info) {
+    }
 };
 
 int Transaction::transaction_counter = 1;
@@ -104,6 +105,17 @@ public:
     }
 };
 
+    // 2024/11/21 고침
+    Bank* findBankByName(const string& bankName, const vector<Bank*>& allBanks) {
+        for (Bank* bank : allBanks) {
+            if (bank->getName() == bankName) { // 은행 이름이 일치하면 반환
+                return bank;
+            }
+        }
+    return nullptr; // 찾지 못하면 nullptr 반환
+    }
+
+
 
 
 class ATM {
@@ -123,7 +135,8 @@ private:
 public:
     ATM(string type, Bank* bank, string serial, string lang, int c1000, int c5000, int c10000, int c50000)
         : atmType(type), primaryBank(bank), serialNumber(serial), language(lang),
-        cash1000(c1000), cash5000(c5000), cash10000(c10000), cash50000(c50000) {}
+        cash1000(c1000), cash5000(c5000), cash10000(c10000), cash50000(c50000) {
+    }
 
     string getSerialNumber() const {
         return serialNumber;
@@ -189,8 +202,11 @@ public:
 
         bool isCashDeposit = (depositType == 1);
         bool isCheckDeposit = (depositType == 2);
-        bool requiresFee = (primaryBank != userBank); // 주은행 여부 확인
-        int fee = requiresFee ? 2000 : 1000;         // 수수료 설정
+
+        bool requiresFee = (primaryBank->getName() != userBank->getName());
+        int fee = requiresFee ? 2000 : 1000;
+ 
+
 
         cout << "Deposit fee is KRW " << fee << ". Would you like to pay the fee?\n";
         cout << "1. Yes\n2. Cancel (push any key)\n-> ";
@@ -266,10 +282,15 @@ public:
             cash5000 += count5000;
             cash10000 += count10000;
             cash50000 += count50000;
+
+            addTransaction(Transaction::transaction_counter++, account->getAccountNumber(), "Deposit", depositAmount, ""); //11.18 21:36
         }
+
         else if (isCheckDeposit) {
             int paperNum = 0;
+            int checkContinue;
             int CheckValue;
+            int depositAmount = 0;
             cout << "How many check papers will you deposit? (30 papers limit)" << endl;
             cin >> paperNum;
 
@@ -278,14 +299,14 @@ public:
                 return;
             }
 
-            int totalCheckValue = 0;
             for (int i = 0; i < paperNum; i++) {
                 while (true) {
                     cout << "Check #" << (i + 1) << ": How much will you deposit with your check? (Minimum amount is 100,000 KRW)" << endl;
                     cin >> CheckValue;
 
                     if (CheckValue >= 100000) {
-                        totalCheckValue += CheckValue;
+                        //account->setBalance(account->getBalance() + CheckValue);
+                        depositAmount += CheckValue;
                         break;
                     }
                     else {
@@ -293,20 +314,11 @@ public:
                     }
                 }
             }
-
-            if (totalCheckValue == 0) {
-                cout << "Deposit amount is 0. Fee will be refunded.\n";
-                cash1000 -= (fee / 1000); // 수수료 환불
-                cout << "Fee of KRW " << fee << " has been refunded.\n";
-                return;
-            }
-
-            // 계좌 잔액 반영
-            account->setBalance(account->getBalance() + totalCheckValue);
+            account->setBalance(account->getBalance() + depositAmount);
             cout << "Successfully deposited!\nThere is KRW " << account->getBalance() << " in your account.\n";
+            addTransaction(Transaction::transaction_counter++, account->getAccountNumber(), "Deposit", depositAmount, ""); //
         }
     }
-
 
 
 
@@ -325,7 +337,7 @@ public:
                 return; // 사용자가 출금을 원하지 않으면 함수 종료
             }
 
-            int withdrawalAmount, fee = 0;
+            int withdrawalAmount = 0;
             cout << "Enter amount to withdraw: ";
             cin >> withdrawalAmount;
 
@@ -346,7 +358,11 @@ public:
 
             // REQ5.2: 계좌 잔액 및 ATM 잔액 부족 체크
             bool isPrimaryBank = (primaryBank == userBank);
-            fee = isPrimaryBank ? 1000 : 2000;  // REQ5.4: 수수료 설정
+            // 2024/11/21 if else문 고침 fee 부분
+            bool requiresFee = (primaryBank->getName() != userBank->getName());
+            int fee = requiresFee ? 2000 : 1000;
+
+
             if (withdrawalAmount + fee > account->getBalance()) {
                 cout << "Insufficient funds in your account.\n";
                 return;
@@ -375,6 +391,7 @@ public:
 
             cout << "Successfully withdrawn!\n";
             cout << "Remaining balance: KRW " << account->getBalance() << "\n";
+            addTransaction(Transaction::transaction_counter++, account->getAccountNumber(), "Withdraw", withdrawalAmount, ""); //11.18 21:49
 
             // REQ5.5: 다른 사용자가 사용할 수 있도록 ATM의 잔액을 감소
             cout << "ATM remaining cash:\n"
@@ -422,13 +439,17 @@ public:
             return;
         }
 
-        // Transfer 수수료 설정
         int transferFee = 0;
-        if (transferType == 1) { // Cash transfer
-            transferFee = 1000; // REQ6.5: Cash transfer 수수료는 1000원
+
+        // Transfer 수수료 설정 (여기 밑에 if else문 2024/11/20 고침. transfer account 계좌 수수료)
+        if (sourceBank == primaryBank && destinationBank == primaryBank) {
+            transferFee = 2000; 
         }
-        else if (transferType == 2) { // Account transfer
-            transferFee = (sourceBank == destinationBank) ? 2000 : 3000; // REQ6.5: Account transfer 수수료는 은행 간 다름
+        else if (sourceBank == primaryBank || destinationBank == primaryBank) {
+            transferFee = 3000; 
+        }
+        else {
+            transferFee = 4000; 
         }
 
         int transferAmount = 0;
@@ -483,9 +504,15 @@ public:
             }
 
             cout << "Transfer of " << transferAmount << " KRW successfully completed.\n";
+            addTransaction(Transaction::transaction_counter++, sourceAccount->getAccountNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber);
         }
 
         else if (transferType == 2) { // Account transfer
+
+
+            cout << "How much do you want to transfer? : ";
+            cin >> transferAmount;
+
             // Account transfer는 원천 계좌에서 금액과 수수료가 차감됨
             if (sourceAccount->getBalance() < transferAmount + transferFee) {
                 cout << "Not enough funds in your account\n!!Session finished!!\n";
@@ -510,6 +537,7 @@ public:
             cout << "KRW " << transferAmount << " is successfully transferred to account " << destinationAccountNumber << "!\n";
             if (transferType == 2) {
                 cout << "There is KRW " << sourceAccount->getBalance() << " in your account.\n";
+                addTransaction(Transaction::transaction_counter++, sourceAccount->getAccountNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber); //11.18 21:52
             }
         }
         else {
@@ -519,14 +547,32 @@ public:
 
 
 
-
     void startSession(const vector<Bank*>& allBanks) {
         string cardNumber, password;
-        cout << "\nPlease insert your card (Enter Account Number): ";
-        cin >> cardNumber;
 
-        if (cardNumber == adminCardNumber) {
-            return startAdminSession();
+        while (true) {
+            cout << "\nPlease insert your card (Enter Account Number): ";
+            cin >> cardNumber;
+
+            if (cardNumber == adminCardNumber) {
+                return startAdminSession();
+            }
+
+            // Check if account exists in any bank
+            bool accountExists = false;
+            for (Bank* bank : allBanks) {
+                if (bank->findAccountByNumber(cardNumber)) {
+                    accountExists = true;
+                    break;
+                }
+            }
+            // 존재하지 않는 번호를 입력했을 때 다시 입력하라 맨이야 -JH- 
+            if (!accountExists) {
+                cout << "There's no account of that number. Please type again.\n";
+            }
+            else {
+                break;
+            }
         }
 
         cout << "Enter Password: ";
@@ -795,20 +841,33 @@ int main() {
             cout << "Primary Bank Name: ";
             cin >> primaryBankName;
 
-            // Loop to ensure unique 6-digit serial number
-            bool isDuplicate;
-            do {
-                cout << "Serial Number(6-digit): ";
-                cin >> serialNumber;
+            // 2024/11/21 고침
+            primaryBank = findBankByName(primaryBankName, allBanks);
 
-                // Check if serial number is exactly 6 digits
-                if (serialNumber.length() != 6) {
-                    cout << "Invalid serial number. It must be exactly 6 digits.\n";
-                    continue;  // Prompt for serial number again
-                }
+
+
+            // Loop to ensure unique 6-digit serial number
+            bool isDuplicate{ false };
+            do {
+                bool serial_is_6digits{ false };
+
+                while (!serial_is_6digits) { // 6 자리 넘지 않으면 while 을 빠져나갈수가 없으셈 ㅇㅇ. - JH- 
+                    cout << "Serial Number(6-digit): ";
+                    cin >> serialNumber;
+                    // Check if serial number is exactly 6 digits
+                    if (serialNumber.length() != 6) {
+                        cout << "Invalid serial number. It must be exactly 6 digits.\n";
+                        continue;
+                        // Prompt for serial number again
+
+                    }
+                    else {
+                        serial_is_6digits = true;
+                    }
+                };
 
                 // Check for duplicate serialNumber
-                isDuplicate = false;
+                /*isDuplicate = false;*/
                 for (const ATM& atm : atms) {
                     if (atm.getSerialNumber() == serialNumber) {
                         cout << "Duplicate serial number detected. Please enter a unique serial number.\n";
@@ -891,4 +950,3 @@ int main() {
 
     return 0;
 }
-
