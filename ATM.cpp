@@ -24,26 +24,33 @@ int Transaction::transaction_counter = 1;
 class Account { //(REQ1.6) (REQ1.7)
 private:
     string bankName;
-    string accountNumber;// cardNumber랑 동일
+    string cardNumber;// cardNumber랑 동일
+    string AccountNumber;
     string username;
     string password;
     int balance;
 
     vector<Transaction> transaction;
 public:
-    Account(const string& bank_name, const string& user_name, const string& account_number, const string& password, int initial_balance) {
+    Account(const string& bank_name, const string& user_name, const string& card_number, const string& account_number, const string& password, int initial_balance) {
         this->bankName = bank_name;
         this->username = user_name;
-        this->accountNumber = account_number;
-        // this->cardNumber=card_number;
+        this->cardNumber = card_number;
+        this->AccountNumber = account_number;
         this->password = password;
         this->balance = initial_balance;
     }
-    Account() : bankName(""), accountNumber(""), username(""), password(""), balance(0) {}
+    Account() : bankName(""), cardNumber(""), username(""), password(""), balance(0) {}
+
+    string getcardNumber() const {
+        return cardNumber;
+    }
 
     string getAccountNumber() const {
-        return accountNumber;
+        return AccountNumber;
     }
+
+
     string getPassword() const {
         return password;
     }
@@ -75,21 +82,39 @@ public:
     string getName() const { return name; }
 
     void addAccount(const Account& account) {
-        accounts[account.getAccountNumber()] = account;
+        accounts[account.getcardNumber()] = account;
     }
 
-    Account* authenticate(const string& accountNumber, const string& password) {
-        if (accounts.count(accountNumber) && accounts[accountNumber].getPassword() == password) {
-            return &accounts[accountNumber];
+    Account* authenticate(const string& cardNumber, const string& password) {
+        if (accounts.count(cardNumber) && accounts[cardNumber].getPassword() == password) {
+            return &accounts[cardNumber];
         }
         //cout << "Wrong  Password." << endl;
         return nullptr;
     }
 
-    // 비밀번호 없이 계좌 번호만으로 찾는 메서드 추가
-    Account* findAccountByNumber(const string& accountNumber) {
-        if (accounts.count(accountNumber)) {
-            return &accounts[accountNumber];
+    // 비밀번호 없이 카드 번호만으로 찾는 메서드 추가
+    Account* findAccountByCardNumber(const string& cardNumber) {
+        if (accounts.count(cardNumber)) {
+            return &accounts[cardNumber];
+        }
+        return nullptr;
+    }
+
+    string getCardNumByAccNum(const string& accountNumber) const {
+        for (const auto& entry : accounts) {
+            const Account& account = entry.second;
+            if (account.getAccountNumber() == accountNumber) {
+                return account.getcardNumber();
+            }
+        }
+        return ""; // 계좌 번호를 찾지 못한 경우 빈 문자열 반환
+    }
+
+    Account* findAccountByAccountNumber(const string& AccountNumber) {
+
+        if (accounts.count(AccountNumber)) {
+            return &accounts[AccountNumber];
         }
         return nullptr;
     }
@@ -98,7 +123,7 @@ public:
         for (const auto& entry : accounts) {
             const Account& account = entry.second;
             cout << "Account [Bank: " << name
-                << ", No: " << account.getAccountNumber()
+                << ", No: " << account.getcardNumber()
                 << ", Owner: " << account.getUserName()
                 << "] balance: " << account.getBalance() << "Won\n";
         }
@@ -142,16 +167,16 @@ public:
         return serialNumber;
     }
 
-    bool authenticateUser(const vector<Bank*>& allBanks, const string& accountNumber, string& password) {
+    bool authenticateUser(const vector<Bank*>& allBanks, const string& cardNumber, string& password) {
         int attemptCount = 0;
         while (attemptCount < 3) {
             if (atmType == "Single") {
-                Account* account = primaryBank->authenticate(accountNumber, password);
+                Account* account = primaryBank->authenticate(cardNumber, password);
                 if (account) {
                     cout << "User authorized for Single-Bank ATM in " << primaryBank->getName() << " Bank." << endl;
                     return true;
                 }
-                else if (primaryBank->findAccountByNumber(accountNumber)) {
+                else if (primaryBank->findAccountByCardNumber(cardNumber)) {
                     // primary bank에 계좌는 있지만 비밀번호가 틀린 경우
                     cout << "Wrong password. Please try again (" << 3 - attemptCount - 1 << " attempts remaining).\n";
                 }
@@ -162,7 +187,7 @@ public:
             }
             else if (atmType == "Multi") {
                 for (Bank* bank : allBanks) {
-                    Account* account = bank->authenticate(accountNumber, password);
+                    Account* account = bank->authenticate(cardNumber, password);
                     if (account) {
                         cout << "User authorized for Multi-Bank ATM. Access granted for " << bank->getName() << " Bank." << endl;
                         return true;
@@ -201,12 +226,7 @@ public:
         cin >> depositType;
 
         if (depositType != 1 && depositType != 2) {
-            if (language_signal == 1) {
-                cout << "Deposit canceled.\n";
-            }
-            else {
-                cout << "입금이 취소되었습니다.\n";
-            }
+            cout << "Deposit canceled.\n";
             return;
         }
 
@@ -293,7 +313,7 @@ public:
             cash10000 += count10000;
             cash50000 += count50000;
 
-            addTransaction(Transaction::transaction_counter++, account->getAccountNumber(), "Deposit", depositAmount, ""); //11.18 21:36
+            addTransaction(Transaction::transaction_counter++, account->getcardNumber(), "Deposit", depositAmount, ""); //11.18 21:36
         }
 
         else if (isCheckDeposit) {
@@ -326,7 +346,7 @@ public:
             }
             account->setBalance(account->getBalance() + depositAmount);
             cout << "Successfully deposited!\nThere is KRW " << account->getBalance() << " in your account.\n";
-            addTransaction(Transaction::transaction_counter++, account->getAccountNumber(), "Deposit", depositAmount, ""); //
+            addTransaction(Transaction::transaction_counter++, account->getcardNumber(), "Deposit", depositAmount, ""); //
         }
     }
 
@@ -401,7 +421,7 @@ public:
 
             cout << "Successfully withdrawn!\n";
             cout << "Remaining balance: KRW " << account->getBalance() << "\n";
-            addTransaction(Transaction::transaction_counter++, account->getAccountNumber(), "Withdraw", withdrawalAmount, ""); //11.18 21:49
+            addTransaction(Transaction::transaction_counter++, account->getcardNumber(), "Withdraw", withdrawalAmount, ""); //11.18 21:49
 
             // REQ5.5: 다른 사용자가 사용할 수 있도록 ATM의 잔액을 감소
             cout << "ATM remaining cash:\n"
@@ -419,6 +439,9 @@ public:
     }
 
 
+
+
+
     void transfer(Account* sourceAccount, Bank* sourceBank, const vector<Bank*>& allBanks) {
         int transferType;
         cout << "\n<< Select transfer type >>\n1. Cash transfer\n2. Account transfer\n3. Cancel (push any key)\n-> ";
@@ -430,8 +453,8 @@ public:
         }
 
         // REQ6.2: 목적 계좌 정보 입력
-        string destinationAccountNumber, destinationBankName;
-        cout << "Input destination account number: ";
+        string destinationAccountNumber, destinationCardNumber, destinationBankName;
+        cout << "Input destination Account number: ";
         cin >> destinationAccountNumber;
         cout << "Input destination bank_name: "; //은행 이름 입력 안받고 계좌번호만으로도 알 수 있게 해야할려나
         cin >> destinationBankName;
@@ -448,6 +471,9 @@ public:
             cout << "Destination bank not found. Transfer canceled.\n";
             return;
         }
+
+        destinationCardNumber = destinationBank->getCardNumByAccNum(destinationAccountNumber);
+
 
         int transferFee = 0;
 
@@ -514,7 +540,7 @@ public:
             }
 
             cout << "Transfer of " << transferAmount << " KRW successfully completed.\n";
-            addTransaction(Transaction::transaction_counter++, sourceAccount->getAccountNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber);
+            addTransaction(Transaction::transaction_counter++, sourceAccount->getcardNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber);
         }
 
         else if (transferType == 2) { // Account transfer
@@ -541,13 +567,13 @@ public:
         }
 
         // 목적 계좌에 금액 추가
-        Account* destinationAccount = destinationBank->findAccountByNumber(destinationAccountNumber);
+        Account* destinationAccount = destinationBank->findAccountByCardNumber(destinationCardNumber);
         if (destinationAccount) {
             destinationAccount->setBalance(destinationAccount->getBalance() + transferAmount);
             cout << "KRW " << transferAmount << " is successfully transferred to account " << destinationAccountNumber << "!\n";
             if (transferType == 2) {
                 cout << "There is KRW " << sourceAccount->getBalance() << " in your account.\n";
-                addTransaction(Transaction::transaction_counter++, sourceAccount->getAccountNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber); //11.18 21:52
+                addTransaction(Transaction::transaction_counter++, sourceAccount->getcardNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber); //11.18 21:52
             }
         }
         else {
@@ -559,7 +585,8 @@ public:
 
     void startSession(const vector<Bank*>& allBanks) {
         string cardNumber, password;
-        int language_signal = 1;//L
+        int language_signal = 1;
+        //L
         // Bi-lingual ATM에서 언어 선택
         if (language == "Bi") {
             cout << "\nSelect language / 언어를 선택하세요:\n1. English\n2. 한국어\n-> ";
@@ -588,7 +615,7 @@ public:
             // Check if account exists in any bank
             bool accountExists = false;
             for (Bank* bank : allBanks) {
-                if (bank->findAccountByNumber(cardNumber)) {
+                if (bank->findAccountByCardNumber(cardNumber)) {
                     accountExists = true;
                     break;
                 }
@@ -605,14 +632,14 @@ public:
             }
             break;
         }
-        
-
+    
         if (language_signal == 1) {
             cout << "Enter Password: ";
         }
         else {
             cout << "비밀번호를 입력하세요: ";
         }//L
+
         cin >> password;
 
         if (authenticateUser(allBanks, cardNumber, password)) {
@@ -652,6 +679,7 @@ public:
                 else {
                     cout << "\n거래를 선택하세요:\n1. 입금\n2. 출금\n3. 송금\n4. 종료\n:";
                 }
+
                 int choice;
                 cin >> choice;
 
@@ -668,7 +696,6 @@ public:
                     else {
                         cout << "입금 완료.\n";
                     }
-
                     break;
                 case 2:
                     withdraw(authenticatedAccount, cardBank);
@@ -723,6 +750,7 @@ public:
             }
         }
     }
+
     void startAdminSession() {
         string command;
         cout << "Admin session started. Displaying Transaction History menu.\n";
@@ -830,6 +858,7 @@ int main() {
     cout << "\n=====<<Account Creation>>=====\n";
     string createAccountInput;
     int accountCount = 1;
+    vector<string> cardNumbers;
     vector<string> accountNumbers;
 
     do {
@@ -837,7 +866,7 @@ int main() {
         cin >> createAccountInput;
 
         if (createAccountInput == "yes") {
-            string bankName, username, accountNumber, password;
+            string bankName, username, cardNumber, AccountNumber, password;
             int balance;
             // Bank 이름 입력
             bool bankFound = false;
@@ -860,31 +889,61 @@ int main() {
 
 
             while (true) {
+                cout << "Card number (4 digits): ";
+                cin >> cardNumber;
+
+                bool validcardNumber = true;
+
+                if (cardNumber.length() != 4) {
+                    cout << "Invalid Card number. It must be exactly 4 digits.\n";
+                    validcardNumber = false;
+                }
+
+                // 기존의 cardNumbers에 중복된 번호가 있는지 확인
+                for (const string& name : cardNumbers) {
+                    if (cardNumber == name) {
+                        validcardNumber = false;
+                        cout << "This Card number is already taken. Please enter a different number.\n";
+                        break;
+                    }
+                }
+
+                if (validcardNumber) {
+                    cardNumbers.push_back(cardNumber);
+                    // cout << "Card number " << cardNumber << " has been successfully added.\n";
+                    break;
+                }
+            }
+
+            // Account  number 확인
+            while (true) {
                 cout << "Account Number (12 digits): ";
-                cin >> accountNumber;
+                cin >> AccountNumber;
 
                 bool validAccountNumber = true;
 
-                if (accountNumber.length() != 12) {
-                    cout << "Invalid account number. It must be exactly 12 digits.\n";
+                // 유효성 검사: AccountNumber는 정확히 12자리여야 함
+                if (AccountNumber.length() != 12) {
+                    cout << "Invalid Account number. It must be exactly 12 digits.\n";
                     validAccountNumber = false;
                 }
 
-                // 기존의 accountNumbers에 중복된 번호가 있는지 확인
-                for (const string& name : accountNumbers) {
-                    if (accountNumber == name) {
+                // 기존의 AccountNumbers에 중복된 번호가 있는지 확인
+                for (const string& existingAccNumber : accountNumbers) {
+                    if (AccountNumber == existingAccNumber) {
                         validAccountNumber = false;
-                        cout << "This account number is already taken. Please enter a different number.\n";
+                        cout << "This Account number is already taken. Please enter a different number.\n";
                         break;
                     }
                 }
 
                 if (validAccountNumber) {
-                    accountNumbers.push_back(accountNumber);
-                    // cout << "Account number " << accountNumber << " has been successfully added.\n";
+                    accountNumbers.push_back(AccountNumber);
+                    // cout << "Account number " << AccountNumber << " has been successfully added.\n";
                     break;
                 }
             }
+
 
             cout << "Balance(KRW): ";
             cin >> balance;
@@ -896,7 +955,7 @@ int main() {
             //bool bankFound = false;
             for (Bank* bank : allBanks) {
                 if (bank->getName() == bankName) {
-                    bank->addAccount(Account(bankName, username, accountNumber, password, balance));
+                    bank->addAccount(Account(bankName, username, cardNumber, AccountNumber, password, balance));
                     bankFound = true;
                     break;
                 }
@@ -1032,4 +1091,5 @@ int main() {
     }
 
     return 0;
+
 }
