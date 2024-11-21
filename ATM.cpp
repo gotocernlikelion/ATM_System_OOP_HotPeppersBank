@@ -1034,6 +1034,7 @@ int main() {
                     cout << "ATM Type is not correct. Please enter 'Single' or 'Multi'.\n";
                 }
             } while (atmType != "single" && atmType != "multi");
+            atmType[0]-=32;
 
             do {
                 cout << "Language(Uni or Bi): ";
@@ -1049,6 +1050,7 @@ int main() {
                     cout << "Language is not correct. Please enter Uni' or 'Bi'.\n";
                 }
             } while (language != "uni" && language != "bi");
+            language[0]-=32;
 
             cout << "1000 Cash ?: ";
             cin >> cash1000;
@@ -1060,7 +1062,7 @@ int main() {
             cin >> cash50000;
 
             // Find the primary bank
-            if (atmType == "single") {
+            if (atmType == "Single") {
                 for (Bank* bank : allBanks) {
                     if (bank->getName() == primaryBankName) {
                         primaryBank = bank;
