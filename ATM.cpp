@@ -347,23 +347,46 @@ public:
 
 
 
-    void withdraw(Account* account, Bank* userBank) {
+    void withdraw(Account* account, Bank* userBank, int language_signal) {
         const int maxWithdrawAmount = 500000;    // REQ5.7: 출금 한도
         const int maxWithdrawalsPerSession = 3;  // REQ5.6: 세션당 최대 출금 횟수
         int withdrawalsThisSession = 0;          // 세션당 출금 횟수를 카운트할 변수
 
+
+
         while (withdrawalsThisSession < maxWithdrawalsPerSession) {
-            cout << "\nWould you like to proceed with a withdrawal?\n1. Yes\n2. No (End withdrawal session)\n-> ";
+            
+            if (language_signal == 1) {
+                cout << "\nWould you like to proceed with a withdrawal?\n1. Yes\n2. No (End withdrawal session)\n-> ";
+            }
+            else {
+                cout << "\n인출 계속 하시겠습니까? \n1. 네\n2. 아니 (인출 세션을 종료)\n-> ";
+            }
+
+
             int proceed;
             cin >> proceed;
 
             if (proceed != 1) {
-                cout << "Withdrawal session ended.\n";
+                if (language_signal == 1) {
+                    cout << "Withdrawal session ended.\n";
+                }
+                else {
+                    cout << "인출 세션을 종료합니다.\n";
+                }
                 return; // 사용자가 출금을 원하지 않으면 함수 종료
             }
 
+
+
             int withdrawalAmount = 0;
-            cout << "Enter amount to withdraw: ";
+            
+            if (language_signal == 1) {
+                cout << "Enter amount to withdraw: ";
+            }
+            else {
+                cout << "인출할 금액을 입력하시오: ";
+            }
             cin >> withdrawalAmount;
 
             // REQ5.1: 사용자가 금액을 입력하면 각 지폐 단위를 계산하여 가장 적은 지폐 개수를 사용하도록 한다.
@@ -377,7 +400,12 @@ public:
 
             // REQ5.7: 출금 한도를 초과할 경우 에러 메시지 출력 후 종료
             if (withdrawalAmount > maxWithdrawAmount) {
-                cout << "The maximum amount of cash withdrawal per transaction is KRW " << maxWithdrawAmount << ".\n";
+                if (language_signal == 1) {
+                    cout << "The maximum amount of cash withdrawal per transaction is KRW " << maxWithdrawAmount << ".\n";
+                }
+                else {
+                    cout << "1회 당 최대 인출 금액은 KRW " << maxWithdrawAmount << ".\n";
+                }
                 return;
             }
 
@@ -389,12 +417,23 @@ public:
 
 
             if (withdrawalAmount + fee > account->getBalance()) {
-                cout << "Insufficient funds in your account.\n";
+                if (language_signal == 1) {
+                    cout << "Insufficient funds in your account.\n";
+                }
+                else {
+                    cout << "당신 계좌에 돈이 부족합니다. \n";
+                }
                 return;
             }
 
+
             if (count50000 > cash50000 || count10000 > cash10000 || count5000 > cash5000 || count1000 > cash1000) {
-                cout << "Insufficient cash in the ATM.\n";
+                if (language_signal == 1) {
+                    cout << "Insufficient cash in the ATM.\n";
+                }
+                else {
+                    cout << "ATM에 현금이 부족합니다. \n";
+                }
                 return;
             }
 
@@ -410,48 +449,79 @@ public:
             int confirm;
             cin >> confirm;
             if (confirm != 1) {
-                cout << "Withdrawal canceled.\n";
+                if (language_signal == 1) {
+                    cout << "Withdrawal canceled.\n";
+                }
+                else {
+                    cout << "인출 취소되었습니다. \n";
+                }
                 return;
             }
 
-            cout << "Successfully withdrawn!\n";
-            cout << "Remaining balance: KRW " << account->getBalance() << "\n";
-            addTransaction(Transaction::transaction_counter++, account->getcardNumber(), "Withdraw", withdrawalAmount, ""); //11.18 21:49
 
-            // REQ5.5: 다른 사용자가 사용할 수 있도록 ATM의 잔액을 감소
-            cout << "ATM remaining cash:\n"
-                << "50000: " << cash50000 << ", 10000: " << cash10000
-                << ", 5000: " << cash5000 << ", 1000: " << cash1000 << "\n";
+            if (language_signal == 1) {
+                cout << "Successfully withdrawn!\n";
+                cout << "Remaining balance: KRW " << account->getBalance() << "\n";
+                addTransaction(Transaction::transaction_counter++, account->getcardNumber(), "Withdraw", withdrawalAmount, ""); //11.18 21:49
 
+                // REQ5.5: 다른 사용자가 사용할 수 있도록 ATM의 잔액을 감소
+                cout << "ATM remaining cash:\n"
+                    << "50000: " << cash50000 << ", 10000: " << cash10000
+                    << ", 5000: " << cash5000 << ", 1000: " << cash1000 << "\n";
+            }
+            else {
+                cout << "인출 성공!\n";
+                cout << "계좌 잔액: KRW " << account->getBalance() << "\n";
+                addTransaction(Transaction::transaction_counter++, account->getcardNumber(), "인출", withdrawalAmount, ""); //11.18 21:49
+
+                // REQ5.5: 다른 사용자가 사용할 수 있도록 ATM의 잔액을 감소
+                cout << "ATM에 남은 현금: \n"
+                    << "50000: " << cash50000 << ", 10000: " << cash10000
+                    << ", 5000: " << cash5000 << ", 1000: " << cash1000 << "\n";
+            }
             withdrawalsThisSession++;  // 출금 횟수 증가
 
             // REQ5.6: 세션당 출금 횟수가 최대치를 초과할 경우 세션 종료
             if (withdrawalsThisSession >= maxWithdrawalsPerSession) {
-                cout << "The maximum number of withdrawals per session is " << maxWithdrawalsPerSession << ". Please restart another session for more withdrawals.\n";
+                if (language_signal == 1) {
+                    cout << "The maximum number of withdrawals per session is " << maxWithdrawalsPerSession << ". Please restart another session for more withdrawals.\n";
+                }
+                else {
+                    cout << "세션당 인출 최대 횟수: " << maxWithdrawalsPerSession << ". 추가 인출을 하고 싶으시다면 세션을 새로 시작하십시오. \n";
+                }
                 break;
             }
         }
     }
 
-
-
-
-
-    void transfer(Account* sourceAccount, Bank* sourceBank, const vector<Bank*>& allBanks) {
+    void transfer(Account* sourceAccount, Bank* sourceBank, const vector<Bank*>& allBanks, int language_signal) {
         int transferType;
-        cout << "\n<< Select transfer type >>\n1. Cash transfer\n2. Account transfer\n3. Cancel (push any key)\n-> ";
+        if (language_signal == 1) {
+            cout << "\n<< Select transfer type >>\n1. Cash transfer\n2. Account transfer\n3. Cancel (push any key)\n-> ";
+        }
+        else {
+            cout << "\n<< 송금 타입 선택 >>\n1. 현금 송금\n2. 계좌 송금\n3. 취소 (아무 키나 입력)\n-> ";
+        }
         cin >> transferType;
 
         if (transferType == 3) {
-            cout << "Transfer canceled.\n";
+            if (language_signal == 1) {
+                cout << "Transfer canceled.\n";
+            }
+            else {
+                cout << "송금이 취소되었음.\n";
+            }
             return;
         }
 
         // REQ6.2: 목적 계좌 정보 입력
         string destinationAccountNumber, destinationCardNumber,destinationBankName;
-        cout << "Input destination Account number: ";
-        cin >> destinationAccountNumber;
-        cout << "Input destination bank_name: "; //은행 이름 입력 안받고 계좌번호만으로도 알 수 있게 해야할려나
+        if (language_signal == 1) {
+            cout << "Input destination bank_name: "; //은행 이름 입력 안받고 계좌번호만으로도 알 수 있게 해야할려나
+        }
+        else {
+            cout << "도착 은행 입력: "; //은행 이름 입력 안받고 계좌번호만으로도 알 수 있게 해야할려나
+        }
         cin >> destinationBankName;
 
         Bank* destinationBank = nullptr;
@@ -463,10 +533,22 @@ public:
         }
 
         if (!destinationBank) {
-            cout << "Destination bank not found. Transfer canceled.\n";
+            if (language_signal == 1) {
+                cout << "Destination bank not found. Transfer canceled.\n";
+            }
+            else {
+                cout << "도착 은행이 없습니다. 송금 취소.\n";
+            }
             return;
         }
 
+        if (language_signal == 1) {
+            cout << "Input destination Account number: ";
+        }
+        else {
+            cout << "도착 계좌번호 입력: ";
+        }
+        cin >> destinationAccountNumber;
         destinationCardNumber = destinationBank->getCardNumByAccNum(destinationAccountNumber);
 
 
@@ -492,30 +574,63 @@ public:
             int insertedAmount;
 
             // Prompt user to confirm inserting the transfer fee first
-            cout << "A transfer fee of KRW " << transferFee << " will be deducted.\n";
-            cout << "1. OK\n2. Cancel\n-> ";
+
+            if (language_signal == 1) {
+                cout << "A transfer fee of KRW " << transferFee << " will be deducted.\n";
+                cout << "1. OK\n2. Cancel\n-> ";
+            }
+            else {
+                cout << "송금 수수료는 KRW " << transferFee << " 입니다. \n";
+                cout << "1. 확인\n2. 취소\n-> ";
+            }
             cin >> command;
 
             if (command == 2) {
-                cout << "Transaction canceled.\n";
+                if (language_signal == 1) {
+                    cout << "Transaction canceled.\n";
+                }
+                else {
+                    cout << "취소되었습니다. \n";
+                }
                 return; // End the process if user cancels
             }
 
-            cout << "Transfer fee accepted. Please insert cash for the transfer.\n";
+            if (language_signal == 1) {
+                cout << "Transfer fee accepted. Please insert cash for the transfer.\n";
+            }
+            else {
+                cout << "송금 수수료 동의하셨습니다. 송금할 금액을 입력하십시오. \n";
+            }
+
 
             do {
-                // Prompt user to insert cash
-                cout << "num of KRW 1000: "; cin >> cash1000;
-                cout << "num of KRW 5000: "; cin >> cash5000;
-                cout << "num of KRW 10000: "; cin >> cash10000;
-                cout << "num of KRW 50000: "; cin >> cash50000;
+                if (language_signal == 1) {
+                    // Prompt user to insert cash
+                    cout << "num of KRW 1000: "; cin >> cash1000;
+                    cout << "num of KRW 5000: "; cin >> cash5000;
+                    cout << "num of KRW 10000: "; cin >> cash10000;
+                    cout << "num of KRW 50000: "; cin >> cash50000;
 
-                // Calculate total inserted cash
-                insertedAmount = cash1000 * 1000 + cash5000 * 5000 + cash10000 * 10000 + cash50000 * 50000;
+                    // Calculate total inserted cash
+                    insertedAmount = cash1000 * 1000 + cash5000 * 5000 + cash10000 * 10000 + cash50000 * 50000;
 
-                cout << "Please check the total amount of transfer cash: " << insertedAmount << " KRW\n";
-                cout << "1. Confirm\n2. Re-enter cash\n-> ";
-                cin >> command;
+                    cout << "Please check the total amount of transfer cash: " << insertedAmount << " KRW\n";
+                    cout << "1. Confirm\n2. Re-enter cash\n-> ";
+                    cin >> command;
+                }
+                else {
+                    cout << "1000원권 개수: "; cin >> cash1000;
+                    cout << "5000원권 개수: "; cin >> cash5000;
+                    cout << "10000원권 개수: "; cin >> cash10000;
+                    cout << "50000원권 개수: "; cin >> cash50000;
+
+                    // Calculate total inserted cash
+                    insertedAmount = cash1000 * 1000 + cash5000 * 5000 + cash10000 * 10000 + cash50000 * 50000;
+
+                    cout << "총 송금 금액: " << insertedAmount << " KRW\n";
+                    cout << "1. 맞습니다. \n2. 다시 입력\n-> ";
+                    cin >> command;
+                }
 
             } while (command != 1);
 
@@ -530,33 +645,62 @@ public:
 
             // Check if sufficient funds are available after deducting fee
             if (transferAmount < 0) {
-                cout << "Insufficient funds to cover the transfer fee. Transaction canceled.\n";
+                if (language_signal == 1) {
+                    cout << "Insufficient funds to cover the transfer fee. Transaction canceled.\n";
+                }
+                else {
+                    cout << "송금 수수료보다 적은 금액을 입력하셨습니다. 송금을 취소합니다. \n";
+                }
                 return; // End process
             }
-
-            cout << "Transfer of " << transferAmount << " KRW successfully completed.\n";
+            if (language_signal == 1) {
+                cout << "Transfer of " << transferAmount << " KRW successfully completed.\n";
+            }
+            else {
+                cout << transferAmount << " 원이 성공적으로 송금되었습니다. \n";
+            }
             addTransaction(Transaction::transaction_counter++, sourceAccount->getcardNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber);
         }
 
         else if (transferType == 2) { // Account transfer
-
-
-            cout << "How much do you want to transfer? : ";
+            if (language_signal == 1) {
+                cout << "How much do you want to transfer? : ";
+            }
+            else {
+                cout << "얼마 송금하실 건가요? : ";
+            }
             cin >> transferAmount;
 
             // Account transfer는 원천 계좌에서 금액과 수수료가 차감됨
             if (sourceAccount->getBalance() < transferAmount + transferFee) {
-                cout << "Not enough funds in your account\n!!Session finished!!\n";
+                if (language_signal == 1) {
+                    cout << "Not enough funds in your account\n!!Session finished!!\n";
+                }
+                else {
+                    cout << "계좌에 돈이 부족합니다\n!!세션 끝!!\n";
+                }
                 return;
             }
 
             // 사용자에게 수수료 안내
-            cout << "Your transfer fee is KRW " << transferFee << ". Do you want to transfer?\n1. Yes\n2. Cancel (push any key)\n-> ";
-            int confirm;
-            cin >> confirm;
-            if (confirm != 1) {
-                cout << "Transfer canceled.\n";
-                return;
+            
+            if (language_signal == 1) {
+                cout << "Your transfer fee is KRW " << transferFee << ". Do you want to transfer?\n1. Yes\n2. Cancel (push any key)\n-> ";
+                int confirm;
+                cin >> confirm;
+                if (confirm != 1) {
+                    cout << "Transfer canceled.\n";
+                    return;
+                }
+            }
+            else {
+                cout << "수수료: KRW " << transferFee << ".송금 하시겠습니까?\n1. 네\n2. 아니요 (아무키나 입력)\n-> ";
+                int confirm;
+                cin >> confirm;
+                if (confirm != 1) {
+                    cout << "송금 취소.\n";
+                    return;
+                }
             }
             sourceAccount->setBalance(sourceAccount->getBalance() - transferAmount - transferFee); // REQ6.7: 원천 계좌 잔액 차감
         }
@@ -565,14 +709,30 @@ public:
         Account* destinationAccount = destinationBank->findAccountByCardNumber(destinationCardNumber);
         if (destinationAccount) {
             destinationAccount->setBalance(destinationAccount->getBalance() + transferAmount);
-            cout << "KRW " << transferAmount << " is successfully transferred to account " << destinationAccountNumber << "!\n";
+            if (language_signal == 1) {
+                cout << "KRW " << transferAmount << " is successfully transferred to account " << destinationAccountNumber << "!\n";
+            }
+            else {
+                cout << "KRW " << transferAmount << " 원이 성공적으로 송금됨. 도착 계좌: " << destinationAccountNumber << "!\n";
+            }
             if (transferType == 2) {
-                cout << "There is KRW " << sourceAccount->getBalance() << " in your account.\n";
-                addTransaction(Transaction::transaction_counter++, sourceAccount->getcardNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber); //11.18 21:52
+                if (language_signal == 1) {
+                    cout << "There is KRW " << sourceAccount->getBalance() << " in your account.\n";
+                    addTransaction(Transaction::transaction_counter++, sourceAccount->getcardNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber); //11.18 21:52
+                }
+                else {
+                    cout << "당신 계좌에" << sourceAccount->getBalance() << "원이 남아있습니다. \n";
+                    addTransaction(Transaction::transaction_counter++, sourceAccount->getcardNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber); //11.18 21:52
+                }
             }
         }
         else {
-            cout << "Destination account not found. Transfer canceled.\n";
+            if (language_signal == 1) {
+                cout << "Destination account not found. Transfer canceled.\n";
+            }
+            else {
+                cout << "도착 계좌가 조회되지 않습니다. 송금이 취소됩니다.\n";
+            }
         }
     }
 
