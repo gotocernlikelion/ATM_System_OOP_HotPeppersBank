@@ -4,74 +4,111 @@
 #include <vector>
 #include <unordered_map>
 #include <fstream>
+
 using namespace std;
 
-class Transaction {
+
+class User {
+protected:
+    string username;
+    string password;
+
 public:
-    static int transaction_counter; // 각 거래의 고유 ID (REQ2.4)
+    // 생성자
+    User(const string& username, const string& password)
+        : username(username), password(password) {
+    }
+
+    User() : username(""), password("") {}
+
+    // Getter 메서드
+    string getUserName() const { return username; }
+    string getPassword() const { return password; }
+
+    // Setter 메서드
+    void setUserName(const string& username) { this->username = username; }
+    void setPassword(const string& password) { this->password = password; }
+};
+
+
+class Transaction {
+private:
     int transactionID;
     string cardNumber;
     string transactionType;
     int amount;
-    string additionalInfo;
+    
+    string additionalInfo; // 추가 정보 필드
 
+public:
+    static int transaction_counter; // 각 거래의 고유 ID (REQ2.4)
     Transaction(int id, const string& card, const string& type, int amt, const string& info = "")
         : transactionID(id), cardNumber(card), transactionType(type), amount(amt), additionalInfo(info) {
     }
+
+    // 소멸자
+    virtual ~Transaction() {}
+
+    // Getter 메서드
+    int getTransactionID() const { return transactionID; }
+    string getCardNumber() const { return cardNumber; }
+    string getTransactionType() const { return transactionType; }
+    int getAmount() const { return amount; }
+    string getAdditionalInfo() const { return additionalInfo; }
 };
 
-int Transaction::transaction_counter = 1;
 
-class Account { //(REQ1.6) (REQ1.7)
+class DepositTransaction : public Transaction {
+public:
+    DepositTransaction(int id, const string& card, int amt)
+        : Transaction(id, card, "Deposit", amt) {
+    }
+};
+
+class WithdrawTransaction : public Transaction {
+public:
+    WithdrawTransaction(int id, const string& card, int amt)
+        : Transaction(id, card, "Withdraw", amt) {
+    }
+};
+
+class TransferTransaction : public Transaction {
+private:
+    string targetAccountNumber;
+
+public:
+    TransferTransaction(int id, const string& card, int amt, const string& target_account)
+        : Transaction(id, card, "Transfer", amt), targetAccountNumber(target_account) {
+    }
+
+    string getTargetAccountNumber() const { return targetAccountNumber; }
+};
+
+
+class Account : public User { // User 클래스 상속
 private:
     string bankName;
-    string cardNumber;// cardNumber랑 동일
+    string cardNumber;
     string AccountNumber;
-    string username;
-    string password;
     int balance;
-
     vector<Transaction> transaction;
+
 public:
-    Account(const string& bank_name, const string& user_name, const string& card_number, const string& account_number, const string& password, int initial_balance) {
-        this->bankName = bank_name;
-        this->username = user_name;
-        this->cardNumber = card_number;
-        this->AccountNumber = account_number;
-        this->password = password;
-        this->balance = initial_balance;
-    }
-    Account() : bankName(""), cardNumber(""), username(""), password(""), balance(0) {}
-
-    string getcardNumber() const {
-        return cardNumber;
+    Account(const string& bank_name, const string& username, const string& card_number,
+        const string& account_number, const string& password, int initial_balance)
+        : User(username, password), bankName(bank_name), cardNumber(card_number),
+        AccountNumber(account_number), balance(initial_balance) {
     }
 
-    string getAccountNumber() const {
-        return AccountNumber;
-    }
+    Account() : User(), bankName(""), cardNumber(""), AccountNumber(""), balance(0) {}
 
+    string getcardNumber() const { return cardNumber; }
+    string getAccountNumber() const { return AccountNumber; }
+    int getBalance() const { return balance; }
+    string getBankName() const { return bankName; }
 
-    string getPassword() const {
-        return password;
-    }
-
-    int getBalance() const {
-        return balance;
-    }
-
-    string getUserName() const {
-        return username;
-    }
-
-    void setBalance(int money) {
-        this->balance = money;
-    }
-
-
+    void setBalance(int money) { this->balance = money; }
 };
-
-
 
 class Bank {
 private:
@@ -109,7 +146,7 @@ public:
                 return account.getcardNumber();
             }
         }
-        return ""; // 계좌 번호를 찾지 못한 경우 빈 문자열 반환
+        return "0"; // 계좌 번호를 찾지 못한 경우 빈 문자열 반환
     }
 
     Account* findAccountByAccountNumber(const string& AccountNumber) {
@@ -134,11 +171,11 @@ public:
 // 2024/11/21 고침
 Bank* findBankByName(const string& bankName, const vector<Bank*>& allBanks) {
     for (Bank* bank : allBanks) {
-        if (bank->getName() == bankName) { // 은행 이름이 일치하면 반환
+        if (bank->getName() == bankName) {
             return bank;
         }
     }
-    return nullptr; // 찾지 못하면 nullptr 반환
+    return nullptr; // 은행을 찾지 못한 경우 nullptr 반환
 }
 
 
@@ -152,11 +189,10 @@ private:
     Bank* primaryBank;   // Primary bank associated with the ATM (REQ1.2)
     int cash1000, cash5000, cash10000, cash50000;
     string adminCardNumber = "0000"; //adm card면 접근(REQ1.9)
-
-    vector<Transaction> session_transactions; // 세션 중 수행된 거래들 (REQ2.3)
     bool session_active = false;              // 세션 상태 표시 (REQ2.1, REQ2.2)
+    vector<Transaction*> allTransactions; // 전체 거래
+    vector<Transaction*> session_transactions; // 세션 내 거래
 
-    vector<Transaction> allTransactions; //11.18 20:57
 
 public:
     ATM(string type, Bank* bank, string serial, string lang, int c1000, int c5000, int c10000, int c50000)
@@ -384,7 +420,7 @@ public:
             else {
                 cout << "총 입금한 지폐 수: " << totalBills << "\n";
             }
- 
+
 
             // 지폐 수량 제한 확인
             const int limit = 50;
@@ -440,9 +476,11 @@ public:
             account->setBalance(account->getBalance() + depositAmount);
             if (language_signal == 1) {
                 cout << "Deposit successful! Your new balance is KRW " << account->getBalance() << ".\n";
+                addTransaction(-1, account->getcardNumber(), "Deposit", depositAmount, "");
             }
             else {
                 cout << "입금이 완료되었습니다!\n계좌 잔액: " << account->getBalance() << "원\n";
+                addTransaction(0, account->getcardNumber(), "Deposit", depositAmount, "");
             }
 
             // ATM 현금 보유량 반영
@@ -493,7 +531,7 @@ public:
 
                     if (cin.fail() || CheckValue < 0) { // 입력 검증: 음수 및 잘못된 입력 처리
                         cin.clear(); // cin 상태 초기화
-                        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // 잘못된 입력 버림
+                        // cin.ignore(numeric_limits<streamsize>::max(), '\n'); // 잘못된 입력 버림
                         if (language_signal == 1) {
                             cout << "Invalid input. Please enter a positive integer amount of at least KRW 100,000.\n";
                         }
@@ -520,14 +558,16 @@ public:
             account->setBalance(account->getBalance() + depositAmount);
             if (language_signal == 1) {
                 cout << "Deposit successful! Your new balance is KRW " << account->getBalance() << ".\n";
+                addTransaction(-1, account->getcardNumber(), "Deposit", depositAmount, "");
             }
             else {
                 cout << "입금이 완료되었습니다!\n계좌 잔액: " << account->getBalance() << "원\n";
+                addTransaction(0, account->getcardNumber(), "Deposit", depositAmount, "");
             }
 
             // 거래 기록 추가
             addTransaction(Transaction::transaction_counter++, account->getcardNumber(), "Deposit", depositAmount, "");
-}
+        }
 
     }
 
@@ -647,7 +687,7 @@ public:
                 cout << "Successfully withdrawn!\n";
                 cout << "Remaining balance: KRW " << account->getBalance() << "\n";
                 addTransaction(Transaction::transaction_counter++, account->getcardNumber(), "Withdraw", withdrawalAmount, ""); //11.18 21:49
-
+                addTransaction(-1, account->getcardNumber(), "Withdraw", withdrawalAmount, "");
                 // REQ5.5: 다른 사용자가 사용할 수 있도록 ATM의 잔액을 감소
                 cout << "ATM remaining cash:\n"
                     << "50000: " << cash50000 << ", 10000: " << cash10000
@@ -656,7 +696,8 @@ public:
             else {
                 cout << "출금 성공!\n";
                 cout << "계좌 잔액: KRW " << account->getBalance() << "\n";
-                addTransaction(Transaction::transaction_counter++, account->getcardNumber(), "출금", withdrawalAmount, ""); //11.18 21:49
+                addTransaction(Transaction::transaction_counter++, account->getcardNumber(), "Withdraw", withdrawalAmount, ""); //11.18 21:49
+                addTransaction(0, account->getcardNumber(), "Withdraw", withdrawalAmount, "");
             }
 
             withdrawalsThisSession++;  // 출금 횟수 증가
@@ -725,6 +766,31 @@ public:
             }
             return;
         }
+
+        //계좌 번호 입력
+        bool isAcc{ false };
+        while (!isAcc) {
+            if (language_signal == 1) {
+                cout << "Input destination account number: ";
+                cin >> destinationAccountNumber;
+            }
+            else {
+                cout << "도착 계좌번호를 입력하세요: ";
+                cin >> destinationAccountNumber;
+            }
+            if (destinationBank->getCardNumByAccNum(destinationAccountNumber) == "0") {
+                if (language_signal == 1) {
+                    cout << "There is no such account number in the Bank." << endl;
+                }
+                else {
+                    cout << "해당 은행에 없는 계좌입니다." << endl;
+                }
+            }
+            else {
+                isAcc = true;
+            }
+        };
+
 
         destinationCardNumber = destinationBank->getCardNumByAccNum(destinationAccountNumber);
 
@@ -847,9 +913,11 @@ public:
             }
             if (language_signal == 1) {
                 cout << "Successfully transferred " << transferAmount << " KRW.\n";
+                addTransaction(-1, sourceAccount->getcardNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber);
             }
             else {
                 cout << transferAmount << " 원이 성공적으로 송금되었습니다. \n";
+                addTransaction(0, sourceAccount->getcardNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber);
             }
             addTransaction(Transaction::transaction_counter++, sourceAccount->getcardNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber);
         }
@@ -912,10 +980,12 @@ public:
                 if (language_signal == 1) {
                     cout << "There is KRW " << sourceAccount->getBalance() << " in your account.\n";
                     addTransaction(Transaction::transaction_counter++, sourceAccount->getcardNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber); //11.18 21:52
+                    addTransaction(-1, sourceAccount->getcardNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber);
                 }
                 else {
                     cout << "당신 계좌에" << sourceAccount->getBalance() << "원이 남아있습니다. \n";
                     addTransaction(Transaction::transaction_counter++, sourceAccount->getcardNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber); //11.18 21:52
+                    addTransaction(0, sourceAccount->getcardNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber);
                 }
             }
         }
@@ -933,6 +1003,11 @@ public:
 
 
     void startSession(const vector<Bank*>& allBanks) {
+        if (cash1000 == 0 && cash5000 == 0 && cash10000 == 0 && cash50000 == 0) {
+            cout << "ATM has no cash available. Session terminated.\n";
+            return;
+        } //WH 11.22 23:26
+
         string cardNumber, password;
         int language_signal = 1;
         //L
@@ -1020,7 +1095,7 @@ public:
                 return;
             }
 
-            vector<string> transactions;
+            session_transactions.clear();
             while (true) {
                 int choice;
                 bool validInput = false;
@@ -1056,29 +1131,41 @@ public:
                 switch (choice) {
                 case 1:
                     deposit(authenticatedAccount, cardBank, language_signal);
-                    transactions.push_back(language_signal == 1 ? "Deposit completed." : "입금 완료.");
                     break;
                 case 2:
                     withdraw(authenticatedAccount, cardBank, language_signal);
-                    transactions.push_back(language_signal == 1 ? "Withdrawal completed." : "출금 완료.");
                     break;
                 case 3:
                     transfer(authenticatedAccount, cardBank, allBanks, language_signal);
-                    transactions.push_back(language_signal == 1 ? "Transfer completed." : "송금 완료.");
                     break;
                 }
             }
 
 
-            if (!transactions.empty()) {
+            if (!session_transactions.empty()) {
                 if (language_signal == 1) {
                     cout << "\nTransaction Summary:\n";
+                    for (const auto& transaction : session_transactions) {
+                        cout << ", Card: " << transaction->getCardNumber()
+                            << ", Type: " << transaction->getTransactionType()
+                            << ", Amount: " << transaction->getAmount();
+                        if (!transaction->getAdditionalInfo().empty()) {
+                            cout << ", Info: " << transaction->getAdditionalInfo();
+                        }
+                        cout << endl;
+                    }
                 }
                 else {
                     cout << "\n거래 요약:\n";
-                }
-                for (const auto& t : transactions) {
-                    cout << "- " << t << "\n";
+                    for (const auto& transaction : session_transactions) {
+                        cout << "카드 번호: " << transaction->getCardNumber()
+                            << ", 거래 타입: " << transaction->getTransactionType()
+                            << ", 거래량: " << transaction->getAmount();
+                        if (!transaction->getAdditionalInfo().empty()) {
+                            cout << ", 정보: " << transaction->getAdditionalInfo();
+                        }
+                        cout << endl;
+                    }
                 }
             }
             else {
@@ -1091,6 +1178,7 @@ public:
             }
         }
     }
+   
 
     void startAdminSession() {
         string command;
@@ -1107,42 +1195,57 @@ public:
 
     //11/18 20:41
     void addTransaction(int id, const string& card, const string& type, int amt, const string& info = "") {
-        allTransactions.push_back(Transaction(id, card, type, amt, info));
-    }
+        if (type == "Deposit") {
+            allTransactions.push_back(new DepositTransaction(id, card, amt));
+        }
+        else if (type == "Withdraw") {
+            allTransactions.push_back(new WithdrawTransaction(id, card, amt));
+        }
+        else if (type == "Transfer") {
+            allTransactions.push_back(new TransferTransaction(id, card, amt, info));
+        }
 
+        else if (id == -1) {
+            allTransactions.push_back(new TransferTransaction(id, card, amt, info));
+        }
+        else {
+            allTransactions.push_back(new TransferTransaction(id, card, amt, info));
+        }
+
+    }
     void displayTransactionHistory() {
         cout << "\n===== Transaction History =====\n";
+
+        // 모든 거래 내역 출력
         for (const auto& transaction : allTransactions) {
-            cout << "ID: " << transaction.transactionID
-                << ", Card: " << transaction.cardNumber
-                << ", Type: " << transaction.transactionType
-                << ", Amount: " << transaction.amount;
-            if (!transaction.additionalInfo.empty()) {
-                cout << ", Info: " << transaction.additionalInfo;
+            cout << "ID: " << transaction->getTransactionID()
+                << ", Card: " << transaction->getCardNumber()
+                << ", Type: " << transaction->getTransactionType()
+                << ", Amount: " << transaction->getAmount();
+            if (!transaction->getAdditionalInfo().empty()) {
+                cout << ", Info: " << transaction->getAdditionalInfo();
             }
-            cout << endl;
+            cout << endl; // 개별 거래 출력
         }
 
         // 외부 파일에 거래 내역 저장
         ofstream outFile("transaction_history.txt");
         for (const auto& transaction : allTransactions) {
-            outFile << "ID: " << transaction.transactionID
-                << ", Card: " << transaction.cardNumber
-                << ", Type: " << transaction.transactionType
-                << ", Amount: " << transaction.amount;
-            if (!transaction.additionalInfo.empty()) {
-                outFile << ", Info: " << transaction.additionalInfo;
+            outFile << "ID: " << transaction->getTransactionID()
+                << ", Card: " << transaction->getCardNumber()
+                << ", Type: " << transaction->getTransactionType()
+                << ", Amount: " << transaction->getAmount();
+            if (!transaction->getAdditionalInfo().empty()) {
+                outFile << ", Info: " << transaction->getAdditionalInfo();
             }
-            outFile << endl;
+            outFile << endl; // 파일에 기록
         }
         outFile.close();
+
         cout << "Transaction history has been saved to transaction_history.txt text file.\n";
     }
 
 };
-
-
-
 
 void displaySnapshot(const vector<Bank>& banks, const vector<ATM>& atms) {
     cout << "\n\n======< 'Account/ATM Snapshot' >======\n";
@@ -1161,6 +1264,8 @@ void displaySnapshot(const vector<Bank>& banks, const vector<ATM>& atms) {
     cout << "=====================================\n";
 }
 
+int Transaction::transaction_counter = 1; // main() 함수 위에 한 번만 선언
+
 
 int main() {
     // Bank Initializing Step
@@ -1177,7 +1282,7 @@ int main() {
         cout << "Enter bank name for initialization(or type 'done' to finish): ";
         cin >> bankInput;
 
-  
+
         if (bankInput == "done") {
             if (banks.empty()) { // Bank가 하나도 생성되지 않았을 때 프로그램 종료
                 cout << "No banks has been created. Exiting program.\n";
@@ -1374,7 +1479,7 @@ int main() {
                     else {
                         serial_is_6digits = true;
                     }
-                };
+                }
 
                 // Check for duplicate serialNumber
                 /*isDuplicate = false;*/
@@ -1505,5 +1610,4 @@ int main() {
     }
 
     return 0;
-
 }
