@@ -37,7 +37,7 @@ private:
     string cardNumber;
     string transactionType;
     int amount;
-    
+
     string additionalInfo; // 추가 정보 필드
 
 public:
@@ -199,7 +199,14 @@ public:
         : atmType(type), primaryBank(bank), serialNumber(serial), language(lang),
         cash1000(c1000), cash5000(c5000), cash10000(c10000), cash50000(c50000) {
     }
-
+    ~ATM() {
+        for (Transaction* transaction : allTransactions) {
+            delete transaction;
+        }
+        for (Transaction* transaction : session_transactions) {
+            delete transaction;
+        }
+    }
     string getSerialNumber() const {
         return serialNumber;
     }
@@ -1178,7 +1185,7 @@ public:
             }
         }
     }
-   
+
 
     void startAdminSession() {
         string command;
