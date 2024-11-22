@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -108,7 +109,7 @@ public:
                 return account.getcardNumber();
             }
         }
-        return ""; // 계좌 번호를 찾지 못한 경우 빈 문자열 반환
+        return "0"; // 계좌 번호를 찾지 못한 경우 빈 문자열 반환
     }
 
     Account* findAccountByAccountNumber(const string& AccountNumber) {
@@ -123,8 +124,8 @@ public:
         for (const auto& entry : accounts) {
             const Account& account = entry.second;
             cout << "Account [Bank: " << name
-                << ", No: " << account.getcardNumber()
-                << ", Owner: " << account.getUserName()
+                << ", Card Number: " << account.getcardNumber()
+                << ", Username: " << account.getUserName()
                 << "] balance: " << account.getBalance() << "Won\n";
         }
     }
@@ -167,21 +168,36 @@ public:
         return serialNumber;
     }
 
-    bool authenticateUser(const vector<Bank*>& allBanks, const string& cardNumber, string& password) {
+    bool authenticateUser(const vector<Bank*>& allBanks, const string& cardNumber, string& password, int language_signal) {
         int attemptCount = 0;
         while (attemptCount < 3) {
             if (atmType == "Single") {
                 Account* account = primaryBank->authenticate(cardNumber, password);
                 if (account) {
-                    cout << "User authorized for Single-Bank ATM in " << primaryBank->getName() << " Bank." << endl;
+                    if (language_signal == 1) {
+                        cout << "Access granted for Single-Bank ATM. You are authorized to access " << primaryBank->getName() << " Bank." << endl;
+                    }
+                    else {
+                        cout << "단일 은행 ATM에 대한 접근 권한이 부여되었습니다. " << primaryBank->getName() << " 은행에 접근할 수 있습니다." << endl;
+                    }
                     return true;
                 }
                 else if (primaryBank->findAccountByCardNumber(cardNumber)) {
                     // primary bank에 계좌는 있지만 비밀번호가 틀린 경우
-                    cout << "Wrong password. Please try again (" << 3 - attemptCount - 1 << " attempts remaining).\n";
+                    if (language_signal == 1) {
+                        cout << "Incorrect password. Please try again (" << 3 - attemptCount - 1 << " attempts left).\n";
+                    }
+                    else {
+                        cout << "비밀번호가 틀렸습니다. 다시 시도하십시오. (" << 3 - attemptCount - 1 << "회 남음)\n";
+                    }
                 }
                 else {
-                    cout << "Invalid Card. Primary Bank of ATM: " << primaryBank->getName() << endl;
+                    if (language_signal == 1) {
+                        cout << "Invalid card. Please note that this ATM is associated with " << primaryBank->getName() << " Bank." << endl;
+                    }
+                    else {
+                        cout << "유효하지 않은 카드입니다. 이 ATM은 " << primaryBank->getName() << " 은행과 연결되어 있음을 참고하십시오." << endl;
+                    }
                     return false;
                 }
             }
@@ -189,26 +205,41 @@ public:
                 for (Bank* bank : allBanks) {
                     Account* account = bank->authenticate(cardNumber, password);
                     if (account) {
-                        cout << "User authorized for Multi-Bank ATM. Access granted for " << bank->getName() << " Bank." << endl;
+                        if (language_signal == 1) {
+                            cout << "Access granted for Multi-Bank ATM. You are authorized to access " << bank->getName() << " Bank." << endl;
+                        }
+                        else {
+                            cout << "다중 은행 ATM에 대한 접근 권한이 부여되었습니다. " << bank->getName() << " 은행에 접근할 수 있습니다." << endl;
+                        }
                         return true;
                     }
                 }
-                cout << "Authorization failed. Please try again (" << 3 - attemptCount - 1 << " attempts remaining).\n";
+                if (language_signal == 1) {
+                    cout << "Authorization failed. Please try again (" << 3 - attemptCount - 1 << " attempts remaining).\n";
+                }
+                else {
+                    cout << "인증 실패. 다시 시도하십시오. (" << 3 - attemptCount - 1 << "회 남음)\n";
+                }
             }
 
             attemptCount++;
             if (attemptCount < 3) {
-                cout << "Enter Password again: ";
+                cout << "Please re-enter your password: ";
                 cin >> password;
             }
         }
-        cout << "Too many failed attempts. Session terminated.\n";
+        if (language_signal == 1) {
+            cout << "Maximum attempts reached. Session terminated for security.\n";
+        }
+        else {
+            cout << "최대 시도 횟수에 도달했습니다. 보안을 위해 세션이 종료되었습니다.\n";
+        }
         return false;
     }
 
 
     void displayRemainingCash() const {
-        cout << "ATM [SN: " << serialNumber << "] remaining cash: {"
+        cout << "ATM [SerialNum: " << serialNumber << "] remaining cash: {"
             << "KRW 50000 : " << cash50000 << ", "
             << "KRW 10000 : " << cash10000 << ", "
             << "KRW 5000 : " << cash5000 << ", "
@@ -218,7 +249,7 @@ public:
     void deposit(Account* account, Bank* userBank, int language_signal) {
         int depositType;
         if (language_signal == 1) {
-            cout << "\n<< Select deposit type >>\n1. Cash deposit\n2. Check deposit\n3. Cancel (push any key)\n-> ";
+            cout << "\n<< Choose deposit type >>\n1. Cash deposit\n2. Check deposit\n3. Cancel (press any key)\n-> ";
         }
         else {
             cout << "\n<< 입금 유형 선택 >>\n1. 현금 입금\n2. 수표 입금\n3. 취소 (아무 키나 누르세요)\n-> ";
@@ -226,7 +257,12 @@ public:
         cin >> depositType;
 
         if (depositType != 1 && depositType != 2) {
-            cout << "Deposit canceled.\n";
+            if (language_signal == 1) {
+                cout << "Deposit has been canceled.\n";
+            }
+            else {
+                cout << "입금이 취소되었습니다.\n";
+            }
             return;
         }
 
@@ -238,51 +274,127 @@ public:
 
 
 
-        cout << "Deposit fee is KRW " << fee << ". Would you like to pay the fee?\n";
-        cout << "1. Yes\n2. Cancel (push any key)\n-> ";
+        if (language_signal == 1) {
+            cout << "The deposit fee is KRW " << fee << ". Would you like to proceed?\n1. Yes\n2. Cancel (press any key)\n-> ";
+        }
+        else {
+            cout << "입금 수수료는 " << fee << "원입니다. 수수료를 지불하시겠습니까?\n1. 예\n2. 취소 (아무 키나 누르세요)\n-> ";
+        }
         int confirm;
         cin >> confirm;
 
         if (confirm != 1) {
-            cout << "Deposit canceled.\n";
+            if (language_signal == 1) {
+                cout << "Deposit has been canceled.\n";
+            }
+            else {
+                cout << "입금이 취소되었습니다.\n";
+            }
             return;
         }
 
         // 수수료 반영
         if (fee == 1000) {
             cash1000++; // 수수료 1000원 지폐 1장 추가
-            cout << "Fee of KRW 1,000 has been accepted.\n";
+            if (language_signal == 1) {
+                cout << "A fee of KRW 1,000 has been accepted.\n";
+            }
+            else {
+                cout << "1,000원의 수수료가 처리되었습니다.\n";
+            }
         }
         else if (fee == 2000) {
             cash1000 += 2; // 수수료 2000원 지폐 2장 추가
-            cout << "Fee of KRW 2,000 has been accepted.\n";
+            if (language_signal == 1) {
+                cout << "A fee of KRW 2,000 has been accepted.\n";
+            }
+            else {
+                cout << "2,000원의 수수료가 처리되었습니다.\n";
+            }
         }
 
         if (isCashDeposit) {
             // 입금할 금액 입력
-            int count1000, count5000, count10000, count50000;
+            int count1000 = 0, count5000 = 0, count10000 = 0, count50000 = 0;
             int totalBills = 0;
 
-            cout << "How many KRW 1000 papers will you deposit? ";
-            cin >> count1000;
+            // 입력 함수 생성
+            auto getPositiveInteger = [&](const string& prompt) -> int {
+                int count;
+                while (true) {
+                    cout << prompt;
+                    cin >> count;
+
+                    if (cin.fail() || count < 0) { // 유효하지 않은 입력 처리
+                        cin.clear(); // 에러 플래그 초기화
+                        cin.ignore(1000, '\n'); // 입력 버퍼 비우기
+                        if (language_signal == 1) {
+                            cout << "Invalid input. Please enter a non-negative integer.\n";
+                        }
+                        else {
+                            cout << "잘못된 입력입니다. 양의 정수를 입력하세요.\n";
+                        }
+                    }
+                    else {
+                        return count; // 유효한 입력 반환
+                    }
+                }
+                };
+
+            // 천 원권
+            if (language_signal == 1) {
+                count1000 = getPositiveInteger("Enter the number of KRW 1,000 bills you want to deposit: ");
+            }
+            else {
+                count1000 = getPositiveInteger("천 원권 몇 장을 입금하시겠습니까? ");
+            }
             totalBills += count1000;
 
-            cout << "How many KRW 5000 papers will you deposit? ";
-            cin >> count5000;
+            // 오천 원권
+            if (language_signal == 1) {
+                count5000 = getPositiveInteger("Enter the number of KRW 5,000 bills you want to deposit: ");
+            }
+            else {
+                count5000 = getPositiveInteger("오천 원권 몇 장을 입금하시겠습니까? ");
+            }
             totalBills += count5000;
 
-            cout << "How many KRW 10000 papers will you deposit? ";
-            cin >> count10000;
+            // 만원권
+            if (language_signal == 1) {
+                count10000 = getPositiveInteger("Enter the number of KRW 10,000 bills you want to deposit: ");
+            }
+            else {
+                count10000 = getPositiveInteger("만원권 몇 장을 입금하시겠습니까? ");
+            }
             totalBills += count10000;
 
-            cout << "How many KRW 50000 papers will you deposit? ";
-            cin >> count50000;
+            // 오만 원권
+            if (language_signal == 1) {
+                count50000 = getPositiveInteger("Enter the number of KRW 50,000 bills you want to deposit: ");
+            }
+            else {
+                count50000 = getPositiveInteger("오만 원권 몇 장을 입금하시겠습니까? ");
+            }
             totalBills += count50000;
+
+            // 총 합계 출력
+            if (language_signal == 1) {
+                cout << "Total number of bills deposited: " << totalBills << "\n";
+            }
+            else {
+                cout << "총 입금한 지폐 수: " << totalBills << "\n";
+            }
+
 
             // 지폐 수량 제한 확인
             const int limit = 50;
             if (totalBills > limit) {
-                cout << "You cannot insert over " << limit << " papers.\n!!Session finished!!\n";
+                if (language_signal == 1) {
+                    cout << "You cannot deposit more than " << limit << " bills at a time.\n!!Session terminated!!\n";
+                }
+                else {
+                    cout << limit << "장을 초과하여 입금할 수 없습니다.\n!!세션 종료!!\n";
+                }
                 return;
             }
 
@@ -290,22 +402,50 @@ public:
             int depositAmount = count1000 * 1000 + count5000 * 5000 + count10000 * 10000 + count50000 * 50000;
 
             if (depositAmount == 0) {
-                cout << "Deposit amount is 0. Fee will be refunded.\n";
+                if (language_signal == 1) {
+                    cout << "Deposit amount cannot be zero. The fee will be refunded.\n";
+                }
+                else {
+                    cout << "입금 금액이 0원입니다. 수수료가 환불됩니다.\n";
+                }
                 cash1000 -= (fee / 1000); // 수수료 환불
-                cout << "Fee of KRW " << fee << " has been refunded.\n";
+                if (language_signal == 1) {
+                    cout << "The fee of KRW " << fee << " has been refunded.\n";
+                }
+                else {
+                    cout << fee << "원이 환불되었습니다.\n";
+                }
                 return;
             }
 
-            cout << "The deposit amount is KRW " << depositAmount << "\nWould you like to continue?\n1. Yes\n2. Cancel (push any key)\n-> ";
+            if (language_signal == 1) {
+                cout << "The total deposit amount is KRW " << depositAmount << "\n.Would you like to proceed?\n1. Yes\n2. Cancel (press any key)\n-> ";
+            }
+            else {
+                cout << "입금 금액은 " << depositAmount << "원입니다.\n계속 진행하시겠습니까?\n1. 예\n2. 취소 (아무 키나 누르세요)\n-> ";
+            }
             cin >> confirm;
             if (confirm != 1) {
-                cout << "Deposit canceled.\n";
+                if (language_signal == 1) {
+                    cout << "Deposit has been canceled.\n";
+                }
+                else {
+                    cout << "입금이 취소되었습니다.\n";
+                }
+
                 return;
             }
 
             // 계좌 잔액 반영
             account->setBalance(account->getBalance() + depositAmount);
-            cout << "Successfully deposited!\nThere is KRW " << account->getBalance() << " in your account.\n";
+            if (language_signal == 1) {
+                cout << "Deposit successful! Your new balance is KRW " << account->getBalance() << ".\n";
+                addTransaction(-1, account->getcardNumber(), "Deposit", depositAmount, "");
+            }
+            else {
+                cout << "입금이 완료되었습니다!\n계좌 잔액: " << account->getBalance() << "원\n";
+                addTransaction(0, account->getcardNumber(), "Deposit", depositAmount, "");
+            }
 
             // ATM 현금 보유량 반영
             cash1000 += count1000;
@@ -318,57 +458,118 @@ public:
 
         else if (isCheckDeposit) {
             int paperNum = 0;
-            int checkContinue;
-            int CheckValue;
+            double CheckValue = 0;
             int depositAmount = 0;
-            cout << "How many check papers will you deposit? (30 papers limit)" << endl;
+
+            // 수표 장 수 입력
+            if (language_signal == 1) {
+                cout << "Enter the number of checks you want to deposit (Maximum 30): ";
+            }
+            else {
+                cout << "몇 장의 수표를 입금하시겠습니까? (최대 30장)" << endl;
+            }
+
             cin >> paperNum;
 
             if (paperNum > 30) {
-                cout << "You cannot insert over 30 papers" << endl;
+                if (language_signal == 1) {
+                    cout << "You cannot deposit more than 30 checks at a time.\n";
+                }
+                else {
+                    cout << "30장을 초과하여 입금할 수 없습니다." << endl;
+                }
                 return;
             }
 
+            // 각 수표 금액 입력
             for (int i = 0; i < paperNum; i++) {
                 while (true) {
-                    cout << "Check #" << (i + 1) << ": How much will you deposit with your check? (Minimum amount is 100,000 KRW)" << endl;
+                    if (language_signal == 1) {
+                        cout << "Check #" << (i + 1) << ": Enter the check amount (Minimum: KRW 100,000): ";
+                    }
+                    else {
+                        cout << "수표 #" << (i + 1) << ": 수표 금액을 입력하세요 (최소 100,000원 이상)" << endl;
+                    }
+
                     cin >> CheckValue;
 
-                    if (CheckValue >= 100000) {
-                        //account->setBalance(account->getBalance() + CheckValue);
-                        depositAmount += CheckValue;
+                    if (cin.fail() || CheckValue < 0) { // 입력 검증: 음수 및 잘못된 입력 처리
+                        cin.clear(); // cin 상태 초기화
+                        // cin.ignore(numeric_limits<streamsize>::max(), '\n'); // 잘못된 입력 버림
+                        if (language_signal == 1) {
+                            cout << "Invalid input. Please enter a positive integer amount of at least KRW 100,000.\n";
+                        }
+                        else {
+                            cout << "잘못된 입력입니다. 양의 정수로 100,000원 이상의 금액을 입력하세요." << endl;
+                        }
+                    }
+                    else if (CheckValue >= 100000) {
+                        depositAmount += CheckValue; // 유효한 수표 금액 누적
                         break;
                     }
                     else {
-                        cout << "Invalid amount. Please enter a value of 100,000 KRW or more." << endl;
+                        if (language_signal == 1) {
+                            cout << "Invalid amount. Please enter an amount of at least KRW 100,000.\n";
+                        }
+                        else {
+                            cout << "잘못된 금액입니다. 100,000원 이상의 금액을 입력하세요." << endl;
+                        }
                     }
                 }
             }
+
+            // 계좌 잔액 업데이트 및 입금 성공 메시지 출력
             account->setBalance(account->getBalance() + depositAmount);
-            cout << "Successfully deposited!\nThere is KRW " << account->getBalance() << " in your account.\n";
-            addTransaction(Transaction::transaction_counter++, account->getcardNumber(), "Deposit", depositAmount, ""); //
+            if (language_signal == 1) {
+                cout << "Deposit successful! Your new balance is KRW " << account->getBalance() << ".\n";
+                addTransaction(-1, account->getcardNumber(), "Deposit", depositAmount, "");
+            }
+            else {
+                cout << "입금이 완료되었습니다!\n계좌 잔액: " << account->getBalance() << "원\n";
+                addTransaction(0, account->getcardNumber(), "Deposit", depositAmount, "");
+            }
+
+            // 거래 기록 추가
+            addTransaction(Transaction::transaction_counter++, account->getcardNumber(), "Deposit", depositAmount, "");
         }
+
     }
 
 
 
-    void withdraw(Account* account, Bank* userBank) {
+    void withdraw(Account* account, Bank* userBank, int language_signal) {
         const int maxWithdrawAmount = 500000;    // REQ5.7: 출금 한도
         const int maxWithdrawalsPerSession = 3;  // REQ5.6: 세션당 최대 출금 횟수
         int withdrawalsThisSession = 0;          // 세션당 출금 횟수를 카운트할 변수
 
         while (withdrawalsThisSession < maxWithdrawalsPerSession) {
-            cout << "\nWould you like to proceed with a withdrawal?\n1. Yes\n2. No (End withdrawal session)\n-> ";
+            if (language_signal == 1) {
+                cout << "\nWould you like to proceed with a withdrawal?\n1. Yes\n2. No (End withdrawal session)\n-> ";
+            }
+            else {
+                cout << "\n출금 계속 진행하시겠습니까? \n1. 네\n2. 아니 (출금 세션을 종료)\n-> ";
+            }
+
             int proceed;
             cin >> proceed;
 
             if (proceed != 1) {
-                cout << "Withdrawal session ended.\n";
+                if (language_signal == 1) {
+                    cout << "Withdrawal session has ended.\n";
+                }
+                else {
+                    cout << "출금 세션을 종료합니다.\n";
+                }
                 return; // 사용자가 출금을 원하지 않으면 함수 종료
             }
 
             int withdrawalAmount = 0;
-            cout << "Enter amount to withdraw: ";
+            if (language_signal == 1) {
+                cout << "Enter the amount to withdraw: ";
+            }
+            else {
+                cout << "출금할 금액을 입력하시오: ";
+            }
             cin >> withdrawalAmount;
 
             // REQ5.1: 사용자가 금액을 입력하면 각 지폐 단위를 계산하여 가장 적은 지폐 개수를 사용하도록 한다.
@@ -382,7 +583,12 @@ public:
 
             // REQ5.7: 출금 한도를 초과할 경우 에러 메시지 출력 후 종료
             if (withdrawalAmount > maxWithdrawAmount) {
-                cout << "The maximum amount of cash withdrawal per transaction is KRW " << maxWithdrawAmount << ".\n";
+                if (language_signal == 1) {
+                    cout << "The maximum withdrawal amount per transaction is KRW " << maxWithdrawAmount << ".\n";
+                }
+                else {
+                    cout << "한 번에 출금할 수 있는 최대 금액은 KRW " << maxWithdrawAmount << "원입니다.\n";
+                }
                 return;
             }
 
@@ -394,12 +600,22 @@ public:
 
 
             if (withdrawalAmount + fee > account->getBalance()) {
-                cout << "Insufficient funds in your account.\n";
+                if (language_signal == 1) {
+                    cout << "Your account balance is insufficient to complete this withdrawal.\n";
+                }
+                else {
+                    cout << "계좌 잔액이 부족하여 출금할 수 없습니다. \n";
+                }
                 return;
             }
 
             if (count50000 > cash50000 || count10000 > cash10000 || count5000 > cash5000 || count1000 > cash1000) {
-                cout << "Insufficient cash in the ATM.\n";
+                if (language_signal == 1) {
+                    cout << "The ATM does not have enough cash for this withdrawal.\n";
+                }
+                else {
+                    cout << "ATM에 출금할 현금이 부족합니다. \n";
+                }
                 return;
             }
 
@@ -410,29 +626,54 @@ public:
             cash5000 -= count5000;
             cash1000 -= count1000;
 
-            cout << "The withdrawal amount is KRW " << withdrawalAmount << " with a fee of KRW " << fee << ".\n";
-            cout << "Would you like to continue?\n1. OK\n2. Cancel (push any key)\n-> ";
+            if (language_signal == 1) {
+                cout << "The withdrawal amount is KRW " << withdrawalAmount << " with a fee of KRW " << fee << ".\n";
+                cout << "Would you like to proceed?\n1. OK\n2. Cancel (push any key)\n-> ";
+            }
+            else {
+                cout << "출금 금액은 " << withdrawalAmount << "원이며, 수수료는 " << fee << "원입니다.\n";
+                cout << "계속 진행하시겠습니까?\n1. 예\n2. 취소 (아무 키나 누르세요)\n-> ";
+            }
+
             int confirm;
             cin >> confirm;
             if (confirm != 1) {
-                cout << "Withdrawal canceled.\n";
+                if (language_signal == 1) {
+                    cout << "Withdrawal canceled.\n";
+                }
+                else {
+                    cout << "출금 취소되었습니다. \n";
+                }
                 return;
             }
 
-            cout << "Successfully withdrawn!\n";
-            cout << "Remaining balance: KRW " << account->getBalance() << "\n";
-            addTransaction(Transaction::transaction_counter++, account->getcardNumber(), "Withdraw", withdrawalAmount, ""); //11.18 21:49
-
-            // REQ5.5: 다른 사용자가 사용할 수 있도록 ATM의 잔액을 감소
-            cout << "ATM remaining cash:\n"
-                << "50000: " << cash50000 << ", 10000: " << cash10000
-                << ", 5000: " << cash5000 << ", 1000: " << cash1000 << "\n";
+            if (language_signal == 1) {
+                cout << "Successfully withdrawn!\n";
+                cout << "Remaining balance: KRW " << account->getBalance() << "\n";
+                addTransaction(Transaction::transaction_counter++, account->getcardNumber(), "Withdraw", withdrawalAmount, ""); //11.18 21:49
+                addTransaction(-1, account->getcardNumber(), "Withdraw", withdrawalAmount, "");
+                // REQ5.5: 다른 사용자가 사용할 수 있도록 ATM의 잔액을 감소
+                cout << "ATM remaining cash:\n"
+                    << "50000: " << cash50000 << ", 10000: " << cash10000
+                    << ", 5000: " << cash5000 << ", 1000: " << cash1000 << "\n";
+            }
+            else {
+                cout << "출금 성공!\n";
+                cout << "계좌 잔액: KRW " << account->getBalance() << "\n";
+                addTransaction(Transaction::transaction_counter++, account->getcardNumber(), "Withdraw", withdrawalAmount, ""); //11.18 21:49
+                addTransaction(0, account->getcardNumber(), "Withdraw", withdrawalAmount, "");
+            }
 
             withdrawalsThisSession++;  // 출금 횟수 증가
 
             // REQ5.6: 세션당 출금 횟수가 최대치를 초과할 경우 세션 종료
             if (withdrawalsThisSession >= maxWithdrawalsPerSession) {
-                cout << "The maximum number of withdrawals per session is " << maxWithdrawalsPerSession << ". Please restart another session for more withdrawals.\n";
+                if (language_signal == 1) {
+                    cout << "The maximum number of withdrawals per session is " << maxWithdrawalsPerSession << ". Please restart another session for more withdrawals.\n";
+                }
+                else {
+                    cout << "세션당 출금 최대 횟수: " << maxWithdrawalsPerSession << ". 추가 출금을 하고 싶으시다면 세션을 새로 시작하십시오. \n";
+                }
                 break;
             }
         }
@@ -441,23 +682,36 @@ public:
 
 
 
-
-    void transfer(Account* sourceAccount, Bank* sourceBank, const vector<Bank*>& allBanks) {
+    void transfer(Account* sourceAccount, Bank* sourceBank, const vector<Bank*>& allBanks, int language_signal) {
         int transferType;
-        cout << "\n<< Select transfer type >>\n1. Cash transfer\n2. Account transfer\n3. Cancel (push any key)\n-> ";
+        if (language_signal == 1) {
+            cout << "\n<< Choose transfer type >>\n1. Cash transfer\n2. Account transfer\n3. Cancel (press any key)\n-> ";
+        }
+        else {
+            cout << "\n<< 송금 유형 선택 >>\n1. 현금 송금\n2. 계좌 송금\n3. 취소 (아무 키나 입력)\n-> ";
+        }
         cin >> transferType;
 
         if (transferType == 3) {
-            cout << "Transfer canceled.\n";
+            if (language_signal == 1) {
+                cout << "Transfer has been canceled.\n";
+            }
+            else {
+                cout << "송금이 취소되었습니다.\n";
+            }
             return;
         }
 
         // REQ6.2: 목적 계좌 정보 입력
         string destinationAccountNumber, destinationCardNumber, destinationBankName;
-        cout << "Input destination Account number: ";
-        cin >> destinationAccountNumber;
-        cout << "Input destination bank_name: "; //은행 이름 입력 안받고 계좌번호만으로도 알 수 있게 해야할려나
+        if (language_signal == 1) {
+            cout << "Enter the name of the destination bank: "; //은행 이름 입력 안받고 계좌번호만으로도 알 수 있게 해야할려나
+        }
+        else {
+            cout << "송금 받을 은행 이름을 입력하세요: "; //은행 이름 입력 안받고 계좌번호만으로도 알 수 있게 해야할려나
+        }
         cin >> destinationBankName;
+
 
         Bank* destinationBank = nullptr;
         for (Bank* bank : allBanks) {
@@ -468,9 +722,39 @@ public:
         }
 
         if (!destinationBank) {
-            cout << "Destination bank not found. Transfer canceled.\n";
+            if (language_signal == 1) {
+                cout << "The destination bank could not be found. Transfer canceled.\n";
+            }
+            else {
+                cout << "송금 받을 은행을 찾을 수 없습니다. 송금을 취소합니다.\n";
+            }
             return;
         }
+
+        //계좌 번호 입력
+        bool isAcc{ false };
+        while (!isAcc) {
+            if (language_signal == 1) {
+                cout << "Input destination account number: ";
+                cin >> destinationAccountNumber;
+            }
+            else {
+                cout << "도착 계좌번호를 입력하세요: ";
+                cin >> destinationAccountNumber;
+            }
+            if (destinationBank->getCardNumByAccNum(destinationAccountNumber) == "0") {
+                if (language_signal == 1) {
+                    cout << "There is no such account number in the Bank." << endl;
+                }
+                else {
+                    cout << "해당 은행에 없는 계좌입니다." << endl;
+                }
+            }
+            else {
+                isAcc = true;
+            }
+        };
+
 
         destinationCardNumber = destinationBank->getCardNumByAccNum(destinationAccountNumber);
 
@@ -497,30 +781,78 @@ public:
             int insertedAmount;
 
             // Prompt user to confirm inserting the transfer fee first
-            cout << "A transfer fee of KRW " << transferFee << " will be deducted.\n";
-            cout << "1. OK\n2. Cancel\n-> ";
+            if (language_signal == 1) {
+                cout << "A transfer fee of KRW " << transferFee << " will be deducted.\n";
+                cout << "1. Confirm\n2. Cancel\n-> ";
+            }
+            else {
+                cout << "송금 수수료는 KRW " << transferFee << " 원입니다. \n";
+                cout << "1. 확인\n2. 취소\n-> ";
+            }
             cin >> command;
 
             if (command == 2) {
-                cout << "Transaction canceled.\n";
+                if (language_signal == 1) {
+                    cout << "Transaction has been canceled.\n";
+                }
+                else {
+                    cout << "송금이 취소되었습니다.\n";
+                }
                 return; // End the process if user cancels
             }
 
-            cout << "Transfer fee accepted. Please insert cash for the transfer.\n";
+            if (language_signal == 1) {
+                cout << "Please insert the cash to complete the transfer.\n";
+            }
+            else {
+                cout << "송금을 완료하려면 송금할 금액을 입력하십시오.\n";
+            }
 
             do {
-                // Prompt user to insert cash
-                cout << "num of KRW 1000: "; cin >> cash1000;
-                cout << "num of KRW 5000: "; cin >> cash5000;
-                cout << "num of KRW 10000: "; cin >> cash10000;
-                cout << "num of KRW 50000: "; cin >> cash50000;
+                if (language_signal == 1) {
+                    cout << "Enter the number of KRW 1,000 bills: ";
+                }
+                else {
+                    cout << "천 원권 개수: ";
+                }
+                cin >> cash1000;
 
-                // Calculate total inserted cash
+                if (language_signal == 1) {
+                    cout << "Enter the number of KRW 5,000 bills: ";
+                }
+                else {
+                    cout << "오천 원권 개수: ";
+                }
+                cin >> cash5000;
+
+                if (language_signal == 1) {
+                    cout << "Enter the number of KRW 10,000 bills: ";
+                }
+                else {
+                    cout << "만원권 개수: ";
+                }
+                cin >> cash10000;
+
+                if (language_signal == 1) {
+                    cout << "Enter the number of KRW 50,000 bills: ";
+                }
+                else {
+                    cout << "오만 원권 개수: ";
+                }
+                cin >> cash50000;
+
                 insertedAmount = cash1000 * 1000 + cash5000 * 5000 + cash10000 * 10000 + cash50000 * 50000;
 
-                cout << "Please check the total amount of transfer cash: " << insertedAmount << " KRW\n";
-                cout << "1. Confirm\n2. Re-enter cash\n-> ";
+                if (language_signal == 1) {
+                    cout << "The total amount entered is: " << insertedAmount << " KRW.\n";
+                    cout << "1. Confirm\n2. Re-enter cash\n-> ";
+                }
+                else {
+                    cout << "총 입력 금액: " << insertedAmount << "원.\n";
+                    cout << "1. 확인\n2. 다시 입력\n-> ";
+                }
                 cin >> command;
+
 
             } while (command != 1);
 
@@ -535,33 +867,65 @@ public:
 
             // Check if sufficient funds are available after deducting fee
             if (transferAmount < 0) {
-                cout << "Insufficient funds to cover the transfer fee. Transaction canceled.\n";
+                if (language_signal == 1) {
+                    cout << "The amount entered is insufficient to cover the transfer fee. Transfer canceled.\n";
+                }
+                else {
+                    cout << "송금 수수료보다 적은 금액을 입력하셨습니다. 송금을 취소합니다. \n";
+                }
                 return; // End process
             }
-
-            cout << "Transfer of " << transferAmount << " KRW successfully completed.\n";
+            if (language_signal == 1) {
+                cout << "Successfully transferred " << transferAmount << " KRW.\n";
+                addTransaction(-1, sourceAccount->getcardNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber);
+            }
+            else {
+                cout << transferAmount << " 원이 성공적으로 송금되었습니다. \n";
+                addTransaction(0, sourceAccount->getcardNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber);
+            }
             addTransaction(Transaction::transaction_counter++, sourceAccount->getcardNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber);
         }
 
         else if (transferType == 2) { // Account transfer
 
 
-            cout << "How much do you want to transfer? : ";
+            if (language_signal == 1) {
+                cout << "Enter the amount you wish to transfer: ";
+            }
+            else {
+                cout << "송금할 금액을 입력하세요: ";
+            }
             cin >> transferAmount;
 
             // Account transfer는 원천 계좌에서 금액과 수수료가 차감됨
             if (sourceAccount->getBalance() < transferAmount + transferFee) {
-                cout << "Not enough funds in your account\n!!Session finished!!\n";
+                if (language_signal == 1) {
+                    cout << "Insufficient funds in your account. Transfer canceled.\n";
+                }
+                else {
+                    cout << "계좌에 잔액이 부족합니다. 송금이 취소됩니다.\n";
+                }
                 return;
             }
 
             // 사용자에게 수수료 안내
-            cout << "Your transfer fee is KRW " << transferFee << ". Do you want to transfer?\n1. Yes\n2. Cancel (push any key)\n-> ";
-            int confirm;
-            cin >> confirm;
-            if (confirm != 1) {
-                cout << "Transfer canceled.\n";
-                return;
+            if (language_signal == 1) {
+                cout << "Your transfer fee is KRW " << transferFee << ". Would you like to proceed?\n1. Yes\n2. Cancel (press any key)\n-> ";
+                int confirm;
+                cin >> confirm;
+                if (confirm != 1) {
+                    cout << "Transfer canceled.\n";
+                    return;
+                }
+            }
+            else {
+                cout << "수수료 : KRW " << transferFee << ".송금 진행하시겠습니까?\n1. 네\n2. 아니요 (아무키나 입력)\n-> ";
+                int confirm;
+                cin >> confirm;
+                if (confirm != 1) {
+                    cout << "송금 취소.\n";
+                    return;
+                }
             }
             sourceAccount->setBalance(sourceAccount->getBalance() - transferAmount - transferFee); // REQ6.7: 원천 계좌 잔액 차감
         }
@@ -570,20 +934,44 @@ public:
         Account* destinationAccount = destinationBank->findAccountByCardNumber(destinationCardNumber);
         if (destinationAccount) {
             destinationAccount->setBalance(destinationAccount->getBalance() + transferAmount);
-            cout << "KRW " << transferAmount << " is successfully transferred to account " << destinationAccountNumber << "!\n";
+            if (language_signal == 1) {
+                cout << "Successfully transferred " << transferAmount << " KRW to account " << destinationAccountNumber << ".\n";
+            }
+            else {
+                cout << destinationAccountNumber << " 계좌에 " << transferAmount << "원이 성공적으로 송금되었습니다.\n";
+            }
             if (transferType == 2) {
-                cout << "There is KRW " << sourceAccount->getBalance() << " in your account.\n";
-                addTransaction(Transaction::transaction_counter++, sourceAccount->getcardNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber); //11.18 21:52
+                if (language_signal == 1) {
+                    cout << "There is KRW " << sourceAccount->getBalance() << " in your account.\n";
+                    addTransaction(Transaction::transaction_counter++, sourceAccount->getcardNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber); //11.18 21:52
+                    addTransaction(-1, sourceAccount->getcardNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber);
+                }   
+                else {
+                    cout << "당신 계좌에" << sourceAccount->getBalance() << "원이 남아있습니다. \n";
+                    addTransaction(Transaction::transaction_counter++, sourceAccount->getcardNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber); //11.18 21:52
+                    addTransaction(0, sourceAccount->getcardNumber(), "Transfer", transferAmount, "To: " + destinationAccountNumber);
+                }
             }
         }
         else {
-            cout << "Destination account not found. Transfer canceled.\n";
+            if (language_signal == 1) {
+                cout << "Destination account could not be found. Transfer canceled.\n";
+            }
+            else {
+                cout << "도착 계좌가 조회되지 않습니다. 송금이 취소됩니다.\n";
+            }
         }
     }
 
 
 
+
     void startSession(const vector<Bank*>& allBanks) {
+        if (cash1000 == 0 && cash5000 == 0 && cash10000 == 0 && cash50000 == 0) {
+            cout << "ATM has no cash available. Session terminated.\n";
+            return;
+        } //WH 11.22 23:26
+
         string cardNumber, password;
         int language_signal = 1;
         //L
@@ -595,16 +983,16 @@ public:
 
         while (true) {
             if (language_signal == 1) {
-                cout << "\nPlease insert your card (Enter Account Number): ";
+                cout << "\nPlease Enter your Card number: ";
             }
             else {
-                cout << "\n카드를 삽입하세요 (계좌 번호를 입력하세요): ";
+                cout << "\n카드 번호를 입력해주세요: ";
             }//L
             cin >> cardNumber;
 
             if (cardNumber == adminCardNumber) {
                 if (language_signal == 1) {
-                    cout << "Admin session started.\n";
+                    cout << "Admin session has been started.\n";
                 }
                 else {
                     cout << "관리자 세션이 시작되었습니다.\n";
@@ -623,18 +1011,18 @@ public:
             // 존재하지 않는 번호를 입력했을 때 다시 입력하라 맨이야 -JH- 
             if (!accountExists) {
                 if (language_signal == 1) {
-                    cout << "There's no account with that number. Please try again.\n";
+                    cout << "There's no account available with that number. Please try again.\n";
                 }
                 else {
-                    cout << "해당 번호의 계좌가 없습니다. 다시 시도하세요.\n";
+                    cout << "해당 번호의 계좌가 존재하지 않습니다. 다시 시도하세요.\n";
                 }
                 continue;//L
             }
             break;
         }
-    
+
         if (language_signal == 1) {
-            cout << "Enter Password: ";
+            cout << "Enter Password for your account : ";
         }
         else {
             cout << "비밀번호를 입력하세요: ";
@@ -642,7 +1030,7 @@ public:
 
         cin >> password;
 
-        if (authenticateUser(allBanks, cardNumber, password)) {
+        if (authenticateUser(allBanks, cardNumber, password, language_signal)) {
             Account* authenticatedAccount = nullptr;
             Bank* cardBank = nullptr;
 
@@ -663,7 +1051,7 @@ public:
 
             if (!authenticatedAccount) {
                 if (language_signal == 1) {
-                    cout << "Authentication failed. Ending session.\n";
+                    cout << "Authentication has failed. Ending session.\n";
                 }
                 else {
                     cout << "인증에 실패했습니다. 세션을 종료합니다.\n";
@@ -671,17 +1059,35 @@ public:
                 return;
             }
 
-            vector<string> transactions;
+            session_transactions.clear();
             while (true) {
-                if (language_signal == 1) {
-                    cout << "\nSelect Transaction:\n1. Deposit\n2. Withdraw\n3. Transfer\n4. Exit\n:";
-                }
-                else {
-                    cout << "\n거래를 선택하세요:\n1. 입금\n2. 출금\n3. 송금\n4. 종료\n:";
-                }
-
                 int choice;
-                cin >> choice;
+                bool validInput = false;
+
+                while (!validInput) {
+                    if (language_signal == 1) {
+                        cout << "\nSelect Transaction:\n1. Deposit\n2. Withdraw\n3. Transfer\n4. Exit\n:";
+                    }
+                    else {
+                        cout << "\n거래를 선택하세요:\n1. 입금\n2. 출금\n3. 송금\n4. 종료\n:";
+                    }
+
+                    cin >> choice;
+
+                    if (cin.fail() || choice < 1 || choice > 4) {
+                        cin.clear(); // 에러 플래그 초기화
+                        cin.ignore(1000, '\n'); // 버퍼 비우기
+                        if (language_signal == 1) {
+                            cout << "Invalid choice. Please enter a number between 1 and 4.\n";
+                        }
+                        else {
+                            cout << "잘못된 선택입니다. 1에서 4 사이의 숫자를 입력하세요.\n";
+                        }
+                    }
+                    else {
+                        validInput = true; // 유효한 입력
+                    }
+                }
 
                 if (choice == 4) break;
 
@@ -689,55 +1095,41 @@ public:
                 switch (choice) {
                 case 1:
                     deposit(authenticatedAccount, cardBank, language_signal);
-                    transactions.push_back(language_signal == 1 ? "Deposit completed." : "입금 완료.");
-                    if (language_signal == 1) {
-                        cout << "Deposit completed.\n";
-                    }
-                    else {
-                        cout << "입금 완료.\n";
-                    }
                     break;
                 case 2:
-                    withdraw(authenticatedAccount, cardBank);
-                    transactions.push_back(language_signal == 1 ? "Withdrawal completed." : "출금 완료.");
-                    if (language_signal == 1) {
-                        cout << "Withdrawal completed.\n";
-                    }
-                    else {
-                        cout << "출금 완료.\n";
-                    }
+                    withdraw(authenticatedAccount, cardBank, language_signal);
                     break;
                 case 3:
-                    transfer(authenticatedAccount, cardBank, allBanks);
-                    transactions.push_back(language_signal == 1 ? "Transfer completed." : "송금 완료.");
-                    if (language_signal == 1) {
-                        cout << "Transfer completed.\n";
-                    }
-                    else {
-                        cout << "송금 완료.\n";
-                    }
+                    transfer(authenticatedAccount, cardBank, allBanks, language_signal);
                     break;
-                case 4:
-                    break;
-                default:
-                    if (language_signal == 1) {
-                        cout << "Invalid choice.\n";
-                    }
-                    else {
-                        cout << "잘못된 선택입니다.\n";
-                    }
                 }
             }
 
-            if (!transactions.empty()) {
+
+            if (!session_transactions.empty()) {
                 if (language_signal == 1) {
                     cout << "\nTransaction Summary:\n";
+                    for (const auto& transaction : session_transactions) {
+                        cout << "Card: " << transaction.cardNumber
+                            << ", Type: " << transaction.transactionType
+                            << ", Amount: " << transaction.amount;
+                        if (!transaction.additionalInfo.empty()) {
+                            cout << ", Info: " << transaction.additionalInfo;
+                    }
+                    cout << endl;
+                    }
                 }
                 else {
                     cout << "\n거래 요약:\n";
-                }
-                for (const auto& t : transactions) {
-                    cout << "- " << t << "\n";
+                    for (const auto& transaction : session_transactions) {
+                        cout << "카드 번호: " << transaction.cardNumber
+                            << ", 거래 타입: " << transaction.transactionType
+                            << ", 거래량: " << transaction.amount;
+                        if (!transaction.additionalInfo.empty()) {
+                            cout << ", 정보: " << transaction.additionalInfo;
+                    }
+                    cout << endl;
+                    }
                 }
             }
             else {
@@ -753,8 +1145,8 @@ public:
 
     void startAdminSession() {
         string command;
-        cout << "Admin session started. Displaying Transaction History menu.\n";
-        cout << "Do you want to view Transaction History? (JJass or yes) :";
+        cout << "Admin session started. Displaying Transaction History.\n";
+        cout << "Would you like to view the Transaction History? (Enter 'JJass' or 'yes') :";
         cin >> command;
         if (command == "JJass" || command == "yes") {
             displayTransactionHistory();
@@ -766,7 +1158,23 @@ public:
 
     //11/18 20:41
     void addTransaction(int id, const string& card, const string& type, int amt, const string& info = "") {
-        allTransactions.push_back(Transaction(id, card, type, amt, info));
+        if(id==0){
+            if(type=="Deposit"){
+                session_transactions.push_back(Transaction(0,card, "예금", amt, info ));
+            }
+            else if(type=="Withdraw"){
+                session_transactions.push_back(Transaction(0,card, "출금", amt, info ));
+            }
+            else if(type=="Transfer"){
+                session_transactions.push_back(Transaction(0,card, "계좌 이체", amt, info ));
+            }
+        }
+        else if(id==-1){
+            session_transactions.push_back(Transaction(0, card, type, amt, info ));
+        }
+        else{
+            allTransactions.push_back(Transaction(id, card, type, amt, info));
+        }
     }
 
     void displayTransactionHistory() {
@@ -795,7 +1203,7 @@ public:
             outFile << endl;
         }
         outFile.close();
-        cout << "Transaction history saved to transaction_history.txt\n";
+        cout << "Transaction history has been saved to transaction_history.txt text file.\n";
     }
 
 };
@@ -804,7 +1212,7 @@ public:
 
 
 void displaySnapshot(const vector<Bank>& banks, const vector<ATM>& atms) {
-    cout << "\n\n=====<< Account/ATM Snapshot >>=====\n";
+    cout << "\n\n======< 'Account/ATM Snapshot' >======\n";
 
     // Display all ATMs' information
     cout << "\n[ATM Information - Remaining Cash]\n";
@@ -823,7 +1231,7 @@ void displaySnapshot(const vector<Bank>& banks, const vector<ATM>& atms) {
 
 int main() {
     // Bank Initializing Step
-    cout << "=====<<Bank Initialization>>=====\n";
+    cout << "======< 'Bank Initialization' >======\n";
     vector<Bank> banks;
     vector<Bank*> allBanks;
     string bankInput;
@@ -833,16 +1241,17 @@ int main() {
 
     // 사용자로부터 은행 이름을 반복적으로 입력받아 초기화
     while (true) {
-        cout << "Enter bank name (or type 'done' to finish): ";
+        cout << "Enter bank name for initialization(or type 'done' to finish): ";
         cin >> bankInput;
+
 
         if (bankInput == "done") {
             if (banks.empty()) { // Bank가 하나도 생성되지 않았을 때 프로그램 종료
-                cout << "No banks created. Exiting program.\n";
+                cout << "No banks has been created. Exiting program.\n";
                 return 0;
             }
             else {
-                cout << "Bank initialization complete. Proceeding to account creation...\n";
+                cout << "Bank initialization has been completed. Proceeding to account Initializaiton...\n";
                 break; // Bank가 최소 하나 이상 생성된 경우 다음 단계로 이동
             }
         }
@@ -850,12 +1259,12 @@ int main() {
         Bank newBank(bankInput); // 새로운 Bank 객체 생성
         banks.push_back(newBank); // banks 벡터에 추가
         allBanks.push_back(&banks.back()); // 포인터 벡터에도 추가
-        cout << "[" << bankInput << "] bank created!\n";
+        cout << "[" << bankInput << "] bank has been created!\n";
     }
 
 
     // Account Creation Step
-    cout << "\n=====<<Account Creation>>=====\n";
+    cout << "\n======< 'Account Creation' >======\n";
     string createAccountInput;
     int accountCount = 1;
     vector<string> cardNumbers;
@@ -863,8 +1272,13 @@ int main() {
     cardNumbers.push_back("0000");
 
     do {
-        cout << "\nDo you want to create Account " << accountCount++ << "? (yes or no) -> ";
+        cout << "\nWould you like to create Account " << accountCount++ << "? (yes or no) -> ";
         cin >> createAccountInput;
+
+        while (createAccountInput != "yes" && createAccountInput != "no") {
+            cout << "Invalid input. Please type 'yes' or 'no': ";
+            cin >> createAccountInput;
+        }
 
         if (createAccountInput == "yes") {
             string bankName, username, cardNumber, AccountNumber, password;
@@ -904,7 +1318,7 @@ int main() {
                 for (const string& name : cardNumbers) {
                     if (cardNumber == name) {
                         validcardNumber = false;
-                        cout << "This Card number is already taken. Please enter a different number.\n";
+                        cout << "This Card number has already been taken. Please try to enter a different number.\n";
                         break;
                     }
                 }
@@ -933,7 +1347,7 @@ int main() {
                 for (const string& existingAccNumber : accountNumbers) {
                     if (AccountNumber == existingAccNumber) {
                         validAccountNumber = false;
-                        cout << "This Account number is already taken. Please enter a different number.\n";
+                        cout << "This Account number has already been taken. Please try to enter a different number.\n";
                         break;
                     }
                 }
@@ -946,8 +1360,26 @@ int main() {
             }
 
 
-            cout << "Balance(KRW): ";
-            cin >> balance;
+            while (true) {
+                cout << "Balance(KRW): ";
+                cin >> balance;
+
+                // 입력 실패 처리
+                if (cin.fail()) {
+                    cin.clear(); // 에러 플래그 초기화
+                    cin.ignore(1000, '\n'); // 버퍼 비우기
+                    cout << "Invalid input. Please enter a positive integer." << endl;
+                    continue; // 다음 반복으로 이동
+                }
+
+                // 조건 검사: 양의 정수인지 확인
+                if (balance >= 0) {
+                    break; // 조건을 만족하면 반복 종료
+                }
+                else {
+                    cout << "Invalid input. Please enter a positive integer." << endl;
+                }
+            }
 
             cout << "Password: ";
             cin >> password;
@@ -962,19 +1394,24 @@ int main() {
                 }
             }
             if (!bankFound) {
-                cout << "Bank not found. Account creation failed.\n";
+                cout << "Bank not found. Account creation has been failed.\n";
             }
         }
     } while (createAccountInput == "yes");
 
     // ATM Creation Step
-    cout << "\n=====<<ATM Creation Step>>=====\n";
+    cout << "\n======< 'ATM Creation Step' >======\n";
     vector<ATM> atms;
     string createATMInput;
     int atmCount = 1;
     do {
-        cout << "\nDo you want to create ATM " << atmCount << "? (yes or no) -> ";
+        cout << "\nWould you like to create ATM " << atmCount << "? (yes or no) -> ";
         cin >> createATMInput;
+
+        while (createATMInput != "yes" && createATMInput != "no") {
+            cout << "Invalid input. Please type 'yes' or 'no': ";
+            cin >> createATMInput;
+        }
 
         if (createATMInput == "yes") {
             string atmType, primaryBankName, serialNumber, language;
@@ -984,10 +1421,7 @@ int main() {
             cout << "Primary Bank Name: ";
             cin >> primaryBankName;
 
-            // 2024/11/21 고침
             primaryBank = findBankByName(primaryBankName, allBanks);
-
-
 
             // Loop to ensure unique 6-digit serial number
             bool isDuplicate{ false };
@@ -1013,7 +1447,7 @@ int main() {
                 /*isDuplicate = false;*/
                 for (const ATM& atm : atms) {
                     if (atm.getSerialNumber() == serialNumber) {
-                        cout << "Duplicate serial number detected. Please enter a unique serial number.\n";
+                        cout << "Duplicate serial number has been detected. Please enter a unique serial number.\n";
                         isDuplicate = true;
                         break;
                     }
@@ -1029,12 +1463,11 @@ int main() {
                         atmType[i] += 32;
                     }
                 }
-
                 if (atmType != "single" && atmType != "multi") {
-                    cout << "ATM Type is not correct. Please enter 'Single' or 'Multi'.\n";
+                    cout << "Incorrect ATM Type. Please enter within 'Single' or 'Multi'.\n";
                 }
             } while (atmType != "single" && atmType != "multi");
-            atmType[0]-=32;
+            atmType[0] -= 32;
 
             do {
                 cout << "Language(Uni or Bi): ";
@@ -1045,21 +1478,42 @@ int main() {
                         language[i] += 32;
                     }
                 }
-
                 if (language != "uni" && language != "bi") {
-                    cout << "Language is not correct. Please enter Uni' or 'Bi'.\n";
+                    cout << "Incorrect Language Type. Please enter within 'Uni' or 'Bi'.\n";
                 }
             } while (language != "uni" && language != "bi");
-            language[0]-=32;
+            language[0] -= 32;
 
-            cout << "1000 Cash ?: ";
-            cin >> cash1000;
-            cout << "5000 Cash?: ";
-            cin >> cash5000;
-            cout << "10000 Cash?: ";
-            cin >> cash10000;
-            cout << "50000 Cash ?: ";
-            cin >> cash50000;
+
+
+            cout << "Number of initial 1,000 Cash?: ";
+            while (!(cin >> cash1000) || cash1000 < 0) {
+                cin.clear(); // 에러 플래그 초기화
+                cin.ignore(1000, '\n'); // 입력 버퍼 비우기
+                cout << "Invalid input. Please enter a non-negative integer for 1,000 Cash: ";
+            }
+
+            cout << "Number of initial 5,000 Cash?: ";
+            while (!(cin >> cash5000) || cash5000 < 0) {
+                cin.clear();
+                cin.ignore(1000, '\n');
+                cout << "Invalid input. Please enter a non-negative integer r for 5,000 Cash: ";
+            }
+
+            cout << "Number of initial 10,000 Cash?: ";
+            while (!(cin >> cash10000) || cash10000 < 0) {
+                cin.clear();
+                cin.ignore(1000, '\n');
+                cout << "Invalid input. Please enter a non-negative integer  for 10,000 Cash: ";
+            }
+
+            cout << "Number of initial 50,000 Cash?: ";
+            while (!(cin >> cash50000) || cash50000 < 0) {
+                cin.clear();
+                cin.ignore(1000, '\n');
+                cout << "Invalid input. Please enter a non-negative integer  for 50,000 Cash: ";
+            }
+
 
             // Find the primary bank
             if (atmType == "Single") {
@@ -1070,7 +1524,7 @@ int main() {
                     }
                 }
                 if (!primaryBank) {
-                    cout << "Primary bank not found. Skipping ATM creation.\n";
+                    cout << "Primary bank has not been found. Skipping ATM creation.\n";
                     continue;
                 }
             }
@@ -1089,7 +1543,7 @@ int main() {
     // Program execution loop to check for '/' input
     string command;
     while (true) {
-        cout << "\nEnter '/' to display snapshot, 'session' to start an ATM session, or 'exit' to quit: ";
+        cout << "\nEnter '/' to view display snapshot, 'session' to start an ATM session, or 'exit' to quit program: ";
         cin >> command;
 
         if (command == "/") {
@@ -1097,7 +1551,7 @@ int main() {
         }
         else if (command == "session") {
             if (atms.empty()) {
-                cout << "No ATMs available. Please create an ATM first.\n";
+                cout << "No ATMs are available. Please create an ATM first.\n";
             }
             else {
                 int atmIndex;
