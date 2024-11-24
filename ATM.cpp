@@ -35,6 +35,7 @@ class Transaction {
 private:
     int transactionID;
     string cardNumber;
+    string accountNumber;
     string transactionType;
     int amount;
 
@@ -42,8 +43,8 @@ private:
 
 public:
     static int transaction_counter; // 각 거래의 고유 ID (REQ2.4)
-    Transaction(int id, const string& card, const string& type, int amt, const string& info = "")
-        : transactionID(id), cardNumber(card), transactionType(type), amount(amt), additionalInfo(info) {
+    Transaction(int id, const string& accountNb, const string& card, const string& type, int amt, const string& info = "")
+        : transactionID(id), accountNumber(accountNb), cardNumber(card), transactionType(type), amount(amt), additionalInfo(info) {
     }
 
     // 소멸자
@@ -52,6 +53,7 @@ public:
     // Getter 메서드
     int getTransactionID() const { return transactionID; }
     string getCardNumber() const { return cardNumber; }
+    string getAccountNumber() const { return accountNumber; }
     string getTransactionType() const { return transactionType; }
     int getAmount() const { return amount; }
     string getAdditionalInfo() const { return additionalInfo; }
@@ -60,21 +62,21 @@ public:
 
 class DepositTransaction : public Transaction {
 public:
-    DepositTransaction(int id, const string& card, int amt)
-        : Transaction(id, card, "Deposit", amt, "Won") {
+    DepositTransaction(int id, const string& accountNb, const string& card, int amt)
+        : Transaction(id, accountNb, card, "Deposit", amt, "Won") {
     }
-    DepositTransaction(const string& card, int amt)
-        : Transaction(0, card, "입금", amt, "원") {
+    DepositTransaction(const string& accountNb, const string& card, int amt)
+        : Transaction(0, accountNb, card, "입금", amt, "원") {
     }
 };
 
 class WithdrawTransaction : public Transaction {
 public:
-    WithdrawTransaction(int id, const string& card, int amt)
-        : Transaction(id, card, "Withdraw", amt, "Won") {
+    WithdrawTransaction(int id, const string& accountNb, const string& card, int amt)
+        : Transaction(id, accountNb, card, "Withdraw", amt, "Won") {
     }
-    WithdrawTransaction(const string& card, int amt)
-        : Transaction(0, card, "출금", amt, "원") {
+    WithdrawTransaction(const string& accountNb, const string& card, int amt)
+        : Transaction(0, accountNb, card, "출금", amt, "원") {
     }
 };
 
@@ -83,11 +85,11 @@ private:
     string targetAccountNumber;
 
 public:
-    TransferTransaction(int id, const string& card, int amt, const string& target_account)
-        : Transaction(id, card, "Transfer", amt, "Won, target account: " + target_account) {
+    TransferTransaction(int id, const string& accountNb, const string& card, int amt, const string& target_account)
+        : Transaction(id, accountNb, card, "Transfer", amt, "Won, target account: " + target_account) {
     }
-    TransferTransaction(const string& card, int amt, const string& target_account)
-        : Transaction(0, card, "계좌이체", amt, "원 도착 계좌: " + target_account) {
+    TransferTransaction(const string& accountNb, const string& card, int amt, const string& target_account)
+        : Transaction(0, accountNb, card, "계좌이체", amt, "원 도착 계좌: " + target_account) {
     }
 
     string getTargetAccountNumber() const { return targetAccountNumber; }
@@ -492,11 +494,11 @@ public:
             account->setBalance(account->getBalance() + depositAmount);
             if (language_signal == 1) {
                 cout << "Deposit successful! Your new balance is KRW " << account->getBalance() << ".\n";
-                addTransaction(-1, account->getcardNumber(), "Deposit", depositAmount, "");
+                addTransaction(-1, account->getAccountNumber(), account->getcardNumber(), "Deposit", depositAmount, "");
             }
             else {
                 cout << "입금이 완료되었습니다!\n계좌 잔액: " << account->getBalance() << "원\n";
-                addTransaction(0, account->getcardNumber(), "Deposit", depositAmount, "");
+                addTransaction(0, account->getAccountNumber(), account->getcardNumber(), "Deposit", depositAmount, "");
             }
 
             // ATM 현금 보유량 반영
@@ -505,7 +507,7 @@ public:
             cash10000 += count10000;
             cash50000 += count50000;
 
-            addTransaction(Transaction::transaction_counter++, account->getcardNumber(), "Deposit", depositAmount, ""); //11.18 21:36
+            addTransaction(Transaction::transaction_counter++, account->getAccountNumber(), account->getcardNumber(), "Deposit", depositAmount, ""); //11.18 21:36
         }
 
         else if (isCheckDeposit) {
@@ -590,15 +592,15 @@ public:
             account->setBalance(account->getBalance() + depositAmount);
             if (language_signal == 1) {
                 cout << "Deposit successful! Your new balance is KRW " << account->getBalance() << ".\n";
-                addTransaction(-1, account->getcardNumber(), "Deposit", depositAmount, "");
+                addTransaction(-1, account->getAccountNumber(), account->getcardNumber(), "Deposit", depositAmount, "");
             }
             else {
                 cout << "입금이 완료되었습니다!\n계좌 잔액: " << account->getBalance() << "원\n";
-                addTransaction(0, account->getcardNumber(), "Deposit", depositAmount, "");
+                addTransaction(0, account->getAccountNumber(), account->getcardNumber(), "Deposit", depositAmount, "");
             }
 
             // 거래 기록 추가
-            addTransaction(Transaction::transaction_counter++, account->getcardNumber(), "Deposit", depositAmount, "");
+            addTransaction(Transaction::transaction_counter++, account->getAccountNumber(), account->getcardNumber(), "Deposit", depositAmount, "");
         }
 
     }
@@ -737,9 +739,14 @@ public:
             if (language_signal == 1) {
                 cout << "Successfully withdrawn! Remaining balance: KRW "
                     << account->getBalance() << "\n";
+                addTransaction(Transaction::transaction_counter++, account->getAccountNumber(), account->getcardNumber(), "Withdraw", withdrawalAmount, ""); //11.18 21:49
+                addTransaction(-1, account->getAccountNumber(), account->getcardNumber(), "Withdraw", withdrawalAmount, "");
+
             }
             else {
                 cout << "출금 성공! 계좌 잔액: KRW " << account->getBalance() << "\n";
+                addTransaction(Transaction::transaction_counter++, account->getAccountNumber(), account->getcardNumber(), "Withdraw", withdrawalAmount, ""); //11.18 21:49
+                addTransaction(0, account->getAccountNumber(), account->getcardNumber(), "Withdraw", withdrawalAmount, "");
             }
 
             // 출금 세션 종료 조건 체크
@@ -974,13 +981,13 @@ public:
             }
             if (language_signal == 1) {
                 cout << "Successfully transferred " << transferAmount << " KRW.\n";
-                addTransaction(-1, sourceAccount->getcardNumber(), "Transfer", transferAmount, destinationAccountNumber);
+                addTransaction(-1, sourceAccount->getAccountNumber(), sourceAccount->getcardNumber(), "Transfer", transferAmount, destinationAccountNumber);
             }
             else {
                 cout << transferAmount << " 원이 성공적으로 송금되었습니다. \n";
-                addTransaction(0, sourceAccount->getcardNumber(), "Transfer", transferAmount, destinationAccountNumber);
+                addTransaction(0, sourceAccount->getAccountNumber(), sourceAccount->getcardNumber(), "Transfer", transferAmount, destinationAccountNumber);
             }
-            addTransaction(Transaction::transaction_counter++, sourceAccount->getcardNumber(), "Transfer", transferAmount, destinationAccountNumber);
+            addTransaction(Transaction::transaction_counter++, sourceAccount->getAccountNumber(), sourceAccount->getcardNumber(), "Transfer", transferAmount, destinationAccountNumber);
         }
 
         else if (transferType == 2) { // Account transfer
@@ -1040,13 +1047,13 @@ public:
             if (transferType == 2) {
                 if (language_signal == 1) {
                     cout << "There is KRW " << sourceAccount->getBalance() << " in your account.\n";
-                    addTransaction(Transaction::transaction_counter++, sourceAccount->getcardNumber(), "Transfer", transferAmount, destinationAccountNumber); //11.18 21:52
-                    addTransaction(-1, sourceAccount->getcardNumber(), "Transfer", transferAmount, destinationAccountNumber);
+                    addTransaction(Transaction::transaction_counter++, sourceAccount->getAccountNumber(), sourceAccount->getcardNumber(), "Transfer", transferAmount, destinationAccountNumber); //11.18 21:52
+                    addTransaction(-1, sourceAccount->getAccountNumber(), sourceAccount->getcardNumber(), "Transfer", transferAmount, destinationAccountNumber);
                 }
                 else {
                     cout << "당신 계좌에" << sourceAccount->getBalance() << "원이 남아있습니다. \n";
-                    addTransaction(Transaction::transaction_counter++, sourceAccount->getcardNumber(), "Transfer", transferAmount, destinationAccountNumber); //11.18 21:52
-                    addTransaction(0, sourceAccount->getcardNumber(), "Transfer", transferAmount, destinationAccountNumber);
+                    addTransaction(Transaction::transaction_counter++, sourceAccount->getAccountNumber(), sourceAccount->getcardNumber(), "Transfer", transferAmount, destinationAccountNumber); //11.18 21:52
+                    addTransaction(0, sourceAccount->getAccountNumber(), sourceAccount->getcardNumber(), "Transfer", transferAmount, destinationAccountNumber);
                 }
             }
         }
@@ -1063,7 +1070,7 @@ public:
 
 
 
-    void startSession(const vector<Bank*>& allBanks) {
+    void startSession(const vector<Bank*>& allBanks , const vector<Bank>& banks, const vector<ATM>& atms) {
         if (cash1000 == 0 && cash5000 == 0 && cash10000 == 0 && cash50000 == 0) {
             cout << "ATM has no cash available. Session terminated.\n";
             return;
@@ -1158,7 +1165,7 @@ public:
 
             session_transactions.clear();
             while (true) {
-                int choice;
+                char choice;
                 bool validInput = false;
 
                 while (!validInput) {
@@ -1186,19 +1193,21 @@ public:
                     }
                 }
 
-                if (choice == 4) break;
+                if (choice == '4') break;
 
                 // 거래 처리 예시 (입금, 출금, 송금에 대한 간단한 메시지)
                 switch (choice) {
-                case 1:
+                case '1':
                     deposit(authenticatedAccount, cardBank, language_signal);
                     break;
-                case 2:
+                case '2':
                     withdraw(authenticatedAccount, cardBank, language_signal);
                     break;
-                case 3:
+                case '3':
                     transfer(authenticatedAccount, cardBank, allBanks, language_signal);
                     break;
+                case'/':
+                    displaySnapshot(banks, atms);
                 }
             }
 
@@ -1208,6 +1217,7 @@ public:
                     cout << "\nTransaction Summary:\n";
                     for (const auto& transaction : session_transactions) {
                         cout << "Card Number: " << transaction->getCardNumber()
+                            << ", Account Number: " << transaction->getAccountNumber()
                             << ", Type: " << transaction->getTransactionType()
                             << ", Amount: " << transaction->getAmount();
                         if (!transaction->getAdditionalInfo().empty()) {
@@ -1220,6 +1230,7 @@ public:
                     cout << "\n거래 요약:\n";
                     for (const auto& transaction : session_transactions) {
                         cout << "카드 번호: " << transaction->getCardNumber()
+                            << ", 계좌 번호: " << transaction->getAccountNumber()
                             << ", 거래 타입: " << transaction->getTransactionType()
                             << ", 거래량: " << transaction->getAmount();
                         if (!transaction->getAdditionalInfo().empty()) {
@@ -1255,39 +1266,39 @@ public:
     }
 
     //11/18 20:41
-    void addTransaction(int id, const string& card, const string& type, int amt, const string& info = "") {
+    void addTransaction(int id, const string& account, const string& card, const string& type, int amt, const string& info = "") {
         if (id == 0) {
             if (type == "Deposit") {
-                session_transactions.push_back(new DepositTransaction(card, amt));
+                session_transactions.push_back(new DepositTransaction(account, card, amt));
             }
             else if (type == "Withdraw") {
-                session_transactions.push_back(new WithdrawTransaction(card, amt));
+                session_transactions.push_back(new WithdrawTransaction(account, card, amt));
             }
             else if (type == "Transfer") {
-                session_transactions.push_back(new TransferTransaction(card, amt, info));
+                session_transactions.push_back(new TransferTransaction(account, card, amt, info));
             }
         }
         else if (id == -1) {
             if (type == "Deposit") {
-                session_transactions.push_back(new DepositTransaction(0, card, amt));
+                session_transactions.push_back(new DepositTransaction(0, account, card, amt));
             }
             else if (type == "Withdraw") {
-                session_transactions.push_back(new WithdrawTransaction(0, card, amt));
+                session_transactions.push_back(new WithdrawTransaction(0, account, card, amt));
             }
             else if (type == "Transfer") {
-                session_transactions.push_back(new TransferTransaction(0, card, amt, info));
+                session_transactions.push_back(new TransferTransaction(0, account, card, amt, info));
             }
 
         }
         else {
             if (type == "Deposit") {
-                allTransactions.push_back(new DepositTransaction(id, card, amt));
+                allTransactions.push_back(new DepositTransaction(id, account, card, amt));
             }
             else if (type == "Withdraw") {
-                allTransactions.push_back(new WithdrawTransaction(id, card, amt));
+                allTransactions.push_back(new WithdrawTransaction(id, account, card, amt));
             }
             else if (type == "Transfer") {
-                allTransactions.push_back(new TransferTransaction(id, card, amt, info));
+                allTransactions.push_back(new TransferTransaction(id, account, card, amt, info));
             }
         }
 
@@ -1315,7 +1326,7 @@ public:
                 << ", Type: " << transaction->getTransactionType()
                 << ", Amount: " << transaction->getAmount();
             if (!transaction->getAdditionalInfo().empty()) {
-                outFile << ", Info: " << transaction->getAdditionalInfo();
+                outFile << transaction->getAdditionalInfo();
             }
             outFile << endl; // 파일에 기록
         }
@@ -1694,7 +1705,7 @@ int main() {
                 cin >> atmIndex;
 
                 if (atmIndex >= 1 && atmIndex <= atms.size()) {
-                    atms[atmIndex - 1].startSession(allBanks);
+                    atms[atmIndex - 1].startSession(allBanks, banks, atms);
                 }
                 else {
                     cout << "Invalid ATM index.\n";
