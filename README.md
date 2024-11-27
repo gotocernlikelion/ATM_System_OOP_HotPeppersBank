@@ -14,7 +14,7 @@ This report documents the implementation of an ATM system as per the requirement
 
 ### REQ 1: System Setup
 
-####(REQ1.1) An ATM has a 6-digit serial number that can be uniquely identified among all ATMs (e.g., 315785).   
+#### (REQ1.1) An ATM has a 6-digit serial number that can be uniquely identified among all ATMs (e.g., 315785).   
      
    - Each ATM is initialized with a unique 6-digit serial number.  
    - Input validation ensures no duplicate serial numbers are created.
@@ -27,7 +27,7 @@ This report documents the implementation of an ATM system as per the requirement
 
    ATM을 개설할 때마다 사용자로부터 Serial Number를 입력받도록 구현되었다. 또한, 각 ATM은 고유한 6자리 Serial Number를 가져야 하므로, Serial Number가 중복되면 다시 입력을 요청해야하고고 입력된 Serial Number가 6자리가 아니면 올바른 형식으로 입력하라는 메시지를 출력하고 재입력을 요구해야 한다. 위 사진은 ATM1의 Serial Number를 123123으로 설정한 경우, ATM2의 Serial Number는 123123으로 설정할 수 없도록 중복이 방지되는 것을 확인할 수 있다다. 또한, Serial Number가 3자리수와 같이 올바르지 않은 경우 ATM 설정이 거부되고 재입력을 요구하는 것을 확인할 수 있다.
 
-####(REQ1.2) An ATM is set to one of the following types: (1) Single Bank ATM, (2) Multi-Bank ATM.   
+#### (REQ1.2) An ATM is set to one of the following types: (1) Single Bank ATM, (2) Multi-Bank ATM.   
    - For Single Bank ATM, the ATM is belonged to a primary bank, and only a card issued by the primary bank is considered valid.   
    - For a Multi-Bank ATM, there is a primary bank that manages the ATM, but a card issued by any other banks is considered valid.  
      
@@ -35,7 +35,7 @@ This report documents the implementation of an ATM system as per the requirement
      
    ATM기를 개설하는 과정에서 Single인지, Multi인지 사용자가 선택할 수 있도록 구현하였다.   
      
-####(REQ1.3) An ATM may support either unilingual or bilingual languages.   
+#### (REQ1.3) An ATM may support either unilingual or bilingual languages.   
    - When an ATM is configured unilingual, all information is displayed in English only.   
    - When an ATM is configured bilingual, a user can choose if the information is to be displayed either English or Korean (Note: if you know only one of the languages, consider using a language translation service, such as Google Translation).  
      
@@ -45,28 +45,28 @@ This report documents the implementation of an ATM system as per the requirement
 
    ATM을 설정하는 과정에서 unilingual or bilingual인지 선택할 수 있다. 사용자가 Uni를 입력했을 경우, 영어로만 출력하고 Bi를 입력할 경우, session 이후에 아래 사진과 같이 영어를 또는 한국어를 선택할 수 있다.
 
-####(REQ1.4) A Bank deposits a certain amount of cashes to an ATM to serve users.   
+#### (REQ1.4) A Bank deposits a certain amount of cashes to an ATM to serve users.   
    ![][image6]  
    
 
 	ATM의 초기설정에서 각 ATM의 1,000원, 5,000원, 10,000원, 50,000원 지폐 수를 설정할 수 있다. 
 
-####(REQ1.5) A Bank can open an Account for a user with the necessary information to perform bank services.   
+#### (REQ1.5) A Bank can open an Account for a user with the necessary information to perform bank services.   
    - (e.g.) Bank name (e.g, Kakao, Shinhan), User name, Account number (12-digit), Available funds, Transaction histories.   
      
    ![][image7]  
 
-####(REQ1.6) A user may have multiple Accounts in a Bank.  
+#### (REQ1.6) A user may have multiple Accounts in a Bank.  
      
    ![][image8]  
    위 사진은 dy1 유저가 toss 은행 계좌를 1개 만드는 것을 보여준다.  
      
-####(REQ1.7) A user may have Accounts in multiple Banks  
+#### (REQ1.7) A user may have Accounts in multiple Banks  
    ![][image9]  
    Kukyang 유저가 Kakao와 Toss 은행의 계좌를 개설하는 사진이다. 
 
      
-####(REQ1.8) Each ATM have several types of transaction fees, and paid as follows: - Deposit fee for non-primary banks: KRW 2,000; the fee is paid by inserting additional cash. - Deposit fee for primary banks: KRW 1,000; the fee is paid by inserting additional cash. 
+#### (REQ1.8) Each ATM have several types of transaction fees, and paid as follows: - Deposit fee for non-primary banks: KRW 2,000; the fee is paid by inserting additional cash. - Deposit fee for primary banks: KRW 1,000; the fee is paid by inserting additional cash. 
 - Withdrawal fee for a primary bank: KRW 1,000; the fee is paid from the withdrawal account. - Withdrawal fee for non-primary banks: KRW 2,000; the fee is paid from the withdrawal account.
 - Account transfer fee between primary banks: KRW 2,000; the fee is paid from the source account. - Account transfer fee between primary and non-primary banks: KRW 3,000; the fee is paid from the source account. 
 - Account transfer fee between non-primary banks: KRW 4,000; the fee is paid from the source account. - Cash transfer fee to any bank type: KRW 1,000; the fee is paid by inserting additional cash. 
