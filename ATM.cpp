@@ -60,7 +60,7 @@ public:
     string getAdditionalInfo() const { return additionalInfo; }
 };
 
-
+vector<Transaction*> allTransactions;
 class DepositTransaction : public Transaction {
 public:
     DepositTransaction(int id, const string& accountNb, const string& card, int amt)
@@ -202,7 +202,6 @@ private:
     int cash1000, cash5000, cash10000, cash50000;
     string adminCardNumber = "0000"; //adm card면 접근(REQ1.9)
     bool session_active = false;              // 세션 상태 표시 (REQ2.1, REQ2.2)
-    vector<Transaction*> allTransactions; // 전체 거래
     vector<Transaction*> session_transactions; // 세션 내 거래
 
 
@@ -212,9 +211,6 @@ public:
         cash1000(c1000), cash5000(c5000), cash10000(c10000), cash50000(c50000) {
     }
     ~ATM() {
-        for (Transaction* transaction : allTransactions) {
-            delete transaction;
-        }
         for (Transaction* transaction : session_transactions) {
             delete transaction;
         }
@@ -1069,7 +1065,9 @@ public:
     }
 
 
-    void startSession(const vector<Bank*>& allBanks, const vector<Bank>& banks, const vector<ATM>& atms) {
+
+
+    void startSession(const vector<Bank*>& allBanks,  const vector<Bank>& banks, const vector<ATM>& atms) {
         if (cash1000 == 0 && cash5000 == 0 && cash10000 == 0 && cash50000 == 0) {
             cout << "ATM has no cash available. Session terminated.\n";
             return;
@@ -1100,7 +1098,7 @@ public:
                 else {
                     cout << "관리자 세션이 시작되었습니다.\n";
                 }//L
-                return startAdminSession();
+                return startAdminSession(allTransactions);
             }
 
             // Check if account exists in any bank
@@ -1251,13 +1249,13 @@ public:
     }
 
 
-    void startAdminSession() {
+    void startAdminSession(vector<Transaction*>& allTransactions) {
         string command;
         cout << "Admin session started. Displaying Transaction History.\n";
-        cout << "Would you like to view the Transaction History? (Enter 'JJass' or 'yes') :";
+        cout << "Would you like to view the Transaction History? (Enter 'yes') :";
         cin >> command;
-        if (command == "JJass" || command == "yes") {
-            displayTransactionHistory();
+        if (command == "yes") {
+            displayTransactionHistory(allTransactions);
         }
         else {
             return;
@@ -1265,7 +1263,7 @@ public:
     }
 
     //11/18 20:41
-    void addTransaction(int id, const string& account, const string& card, const string& type, int amt, const string& info = "") {
+    void addTransaction(int id, const string& account, const string& card, const string& type, int amt, const string& info = "", vector<Transaction*>& allTransactions= ::allTransactions) {
         if (id == 0) {
             if (type == "Deposit") {
                 session_transactions.push_back(new DepositTransaction(account,card, amt));
@@ -1302,7 +1300,7 @@ public:
         }
 
     }
-    void displayTransactionHistory() {
+    void displayTransactionHistory(const vector<Transaction*>& allTransactions) {
         cout << "\n===== Transaction History =====\n";
 
         // 모든 거래 내역 출력
@@ -1365,6 +1363,7 @@ int main() {
     vector<string> banknames;
     bool vaildbankname;
     banks.reserve(100);
+    vector<Transaction*> allTransactions; // 전체 거래
 
 
     // 사용자로부터 은행 이름을 반복적으로 입력받아 초기화
