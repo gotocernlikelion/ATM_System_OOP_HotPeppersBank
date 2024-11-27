@@ -48,7 +48,6 @@ This report documents the implementation of an ATM system as per the requirement
 #### (REQ1.4) A Bank deposits a certain amount of cashes to an ATM to serve users.   
    ![][image6]  
    
-
 	ATM의 초기설정에서 각 ATM의 1,000원, 5,000원, 10,000원, 50,000원 지폐 수를 설정할 수 있다. 
 
 #### (REQ1.5) A Bank can open an Account for a user with the necessary information to perform bank services.   
@@ -102,24 +101,18 @@ This report documents the implementation of an ATM system as per the requirement
 
    
 ATM 1(Toss, single) - Account 1 (Toss) 
-
 	위 사진을 통해, Single로 설정한 Toss 뱅크에 Toss 카드를 삽입하여 입금을 시도할 경우, 1,000원의 수수료가 부과되는 것을 확인할 수 있다.
 
-
 ATM2(Kakao, Multi) - Account2(Toss)
-
-
 	위 사진을 통해, Multi로 설정한 Kakao 뱅크에 Toss 카드를 삽입하여 입금을 시도할 경우, 2,000원의 수수료가 부과되는 것을 확인할 수 있다.
 
 Withdraw
-              1. ATM1(Toss, single) - Account1 (Toss)
-
-위 사진을 통해, Single로 설정한 Toss 뱅크에 Toss 카드를 삽입하여 출금을 시도할  경우, 1,000원의 수수료가 부과되는 것을 확인할 수 있다.    
+        1. ATM1(Toss, single) - Account1 (Toss)
+	위 사진을 통해, Single로 설정한 Toss 뱅크에 Toss 카드를 삽입하여 출금을 시도할  경우, 1,000원의 수수료가 부과되는 것을 확인할 수 있다.    
 
 
 2. ATM2(Kakao, Multi) - Account2(Toss)
-
-아래 사진을 통해, Single로 설정한 Toss 뱅크에 Toss 카드를 삽입하여 출금을 시도할  경우, 2,000원의 수수료가 부과되는 것을 확인할 수 있다.
+	아래 사진을 통해, Single로 설정한 Toss 뱅크에 Toss 카드를 삽입하여 출금을 시도할  경우, 2,000원의 수수료가 부과되는 것을 확인할 수 있다.
 
 Transfer
 ATM1(Toss, Single) 보내는 계좌: Account1 (Toss) -> 받는 계좌: Account2(Toss)
