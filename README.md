@@ -1,7 +1,4 @@
-# HotPeppers_Bank
-뜨거운 고추들 은행
-
-# Term Project Report: Automated Teller Machine (ATM) System
+# Term Project Report: Automated Teller Machine (ATM) System (HotPeppers_Bank; 뜨거운 고추들 은행)
 
 Authors: Woohyuk Kwon, Daeyang Seo, Wonjung Baek, Junho Kim  
 Submission Date: 2024년 11월 27일   
