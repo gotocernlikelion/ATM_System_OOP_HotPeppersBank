@@ -21,8 +21,7 @@ This report documents the implementation of an ATM system as per the requirement
    - Each ATM is initialized with a unique 6-digit serial number.  
    - Input validation ensures no duplicate serial numbers are created.
 
-   
-	<img src="img/image1.png">
+   <img src="img/image1.png">
 
    ![][image2]
 
