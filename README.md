@@ -23,7 +23,8 @@ This report documents the implementation of an ATM system as per the requirement
 
    <img src="img/image1.png">
 
-   ![][image2]
+   <img src="img/image2.png">
+
 
    ATM을 개설할 때마다 사용자로부터 Serial Number를 입력받도록 구현되었다. 또한, 각 ATM은 고유한 6자리 Serial Number를 가져야 하므로, Serial Number가 중복되면 다시 입력을 요청해야하고고 입력된 Serial Number가 6자리가 아니면 올바른 형식으로 입력하라는 메시지를 출력하고 재입력을 요구해야 한다. 위 사진은 ATM1의 Serial Number를 123123으로 설정한 경우, ATM2의 Serial Number는 123123으로 설정할 수 없도록 중복이 방지되는 것을 확인할 수 있다다. 또한, Serial Number가 3자리수와 같이 올바르지 않은 경우 ATM 설정이 거부되고 재입력을 요구하는 것을 확인할 수 있다.
 
@@ -31,7 +32,8 @@ This report documents the implementation of an ATM system as per the requirement
    - For Single Bank ATM, the ATM is belonged to a primary bank, and only a card issued by the primary bank is considered valid.   
    - For a Multi-Bank ATM, there is a primary bank that manages the ATM, but a card issued by any other banks is considered valid.  
      
-   Screenshot: ![][image3]  
+   <img src="img/image3.png">
+  
      
    ATM기를 개설하는 과정에서 Single인지, Multi인지 사용자가 선택할 수 있도록 구현하였다.   
      
@@ -39,29 +41,35 @@ This report documents the implementation of an ATM system as per the requirement
    - When an ATM is configured unilingual, all information is displayed in English only.   
    - When an ATM is configured bilingual, a user can choose if the information is to be displayed either English or Korean (Note: if you know only one of the languages, consider using a language translation service, such as Google Translation).  
      
-   Screenshot: ![][image4]
+   <img src="img/image4.png">
 
-   ![][image5]
+
+   <img src="img/image5.png">
+
 
    ATM을 설정하는 과정에서 unilingual or bilingual인지 선택할 수 있다. 사용자가 Uni를 입력했을 경우, 영어로만 출력하고 Bi를 입력할 경우, session 이후에 아래 사진과 같이 영어를 또는 한국어를 선택할 수 있다.
 
 #### (REQ1.4) A Bank deposits a certain amount of cashes to an ATM to serve users.   
-   ![][image6]  
+ <img src="img/image6.png">
+
    
 	ATM의 초기설정에서 각 ATM의 1,000원, 5,000원, 10,000원, 50,000원 지폐 수를 설정할 수 있다. 
 
 #### (REQ1.5) A Bank can open an Account for a user with the necessary information to perform bank services.   
    - (e.g.) Bank name (e.g, Kakao, Shinhan), User name, Account number (12-digit), Available funds, Transaction histories.   
      
-   ![][image7]  
+<img src="img/image7.png">
+  
 
 #### (REQ1.6) A user may have multiple Accounts in a Bank.  
-     
-   ![][image8]  
+
+<img src="img/image8.png">
+
    위 사진은 dy1 유저가 toss 은행 계좌를 1개 만드는 것을 보여준다.  
      
 #### (REQ1.7) A user may have Accounts in multiple Banks  
-   ![][image9]  
+<img src="img/image9.png">
+  
    Kukyang 유저가 Kakao와 Toss 은행의 계좌를 개설하는 사진이다. 
 
      
@@ -72,7 +80,8 @@ This report documents the implementation of an ATM system as per the requirement
 
      
    * Account 개설 상태  
-   ![][image10]  
+<img src="img/image10.png">
+ 
    
 
 |  | `Account 1` | `Account 2` | `Account 3` |
@@ -86,7 +95,8 @@ This report documents the implementation of an ATM system as per the requirement
 
    * ATM 생성 상태
 
-   ![][image11]
+<img src="img/image11.png">
+
 
 |  | `ATM 1` | `ATM 2` |
 | :---- | :---- | :---- |
