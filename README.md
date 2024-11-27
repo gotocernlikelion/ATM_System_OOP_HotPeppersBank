@@ -23,7 +23,7 @@ This report documents the implementation of an ATM system as per the requirement
 
    
 
-   Screenshot: ![][img/image1.png]
+   Screenshot: ![][image1.png]
 
    ![][image2]
 
