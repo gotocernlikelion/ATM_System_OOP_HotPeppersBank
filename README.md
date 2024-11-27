@@ -22,8 +22,7 @@ This report documents the implementation of an ATM system as per the requirement
    - Input validation ensures no duplicate serial numbers are created.
 
    
-
-   Screenshot: ![][image1.png]
+	<img src="img/image1.png">
 
    ![][image2]
 
