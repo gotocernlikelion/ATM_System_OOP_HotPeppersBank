@@ -83,7 +83,7 @@ This report documents the implementation of an ATM system as per the requirement
 | `Card number` | `1234` | `1235` | `1236` |
 | `Account number` | `123123123123` | `123123123125` | `123123123126` |
 
-   계좌 개설을 위 표와 같이 한 상태이다.`
+   계좌 개설을 위 표와 같이 한 상태이다.
 
    * ATM 생성 상태
 
@@ -96,39 +96,40 @@ This report documents the implementation of an ATM system as per the requirement
 
    
 
-   `ATM 생성을 위 표와 같이 한 상태이다.`
+   ATM 생성을 위 표와 같이 한 상태이다.
 
-   `Deposit`
+   **Deposit**
 
    
+ATM 1(Toss, single) - Account 1 (Toss) 
 
-1. `ATM 1(Toss, single) - Account 1 (Toss)`   
-   `![][image12]`  
-   	`위 사진을 통해, Single로 설정한 Toss 뱅크에 Toss 카드를 삽입하여 입금을 시도할 경우, 1,000원의 수수료가 부과되는 것을 확인할 수 있다.`  
-     
-     
-2. `ATM2(Kakao, Multi) - Account2(Toss)`
+	위 사진을 통해, Single로 설정한 Toss 뱅크에 Toss 카드를 삽입하여 입금을 시도할 경우, 1,000원의 수수료가 부과되는 것을 확인할 수 있다.
 
-   `![][image13]`
 
-	`위 사진을 통해, Multi로 설정한 Kakao 뱅크에 Toss 카드를 삽입하여 입금을 시도할 경우, 2,000원의 수수료가 부과되는 것을 확인할 수 있다.`
+ATM2(Kakao, Multi) - Account2(Toss)
 
-`Withdraw`  
-              `1. ATM1(Toss, single) - Account1 (Toss)`  
-`![][image14]`  
-`위 사진을 통해, Single로 설정한 Toss 뱅크에 Toss 카드를 삽입하여 출금을 시도할  경우, 1,000원의 수수료가 부과되는 것을 확인할 수 있다.`    
 
-`2. ATM2(Kakao, Multi) - Account2(Toss)`  
-`![][image15]`  
-`아래 사진을 통해, Single로 설정한 Toss 뱅크에 Toss 카드를 삽입하여 출금을 시도할  경우, 2,000원의 수수료가 부과되는 것을 확인할 수 있다.`
+	위 사진을 통해, Multi로 설정한 Kakao 뱅크에 Toss 카드를 삽입하여 입금을 시도할 경우, 2,000원의 수수료가 부과되는 것을 확인할 수 있다.
 
-`Transfer`  
-`ATM1(Toss, Single) 보내는 계좌: Account1 (Toss) -> 받는 계좌: Account2(Toss)`  
-`![][image16]`  
-`ATM1(Toss, Single) 보내는 계좌: Account1 (Toss) -> 받는 계좌: Account3(Kakao)`  
-`![][image17]`  
-`ATM2(Kakao, Multi) 보내는 계좌: Account1 (Toss) -> 받는 계좌: Account2(Toss)`  
-`![][image18]`
+Withdraw
+              1. ATM1(Toss, single) - Account1 (Toss)
+
+위 사진을 통해, Single로 설정한 Toss 뱅크에 Toss 카드를 삽입하여 출금을 시도할  경우, 1,000원의 수수료가 부과되는 것을 확인할 수 있다.    
+
+
+2. ATM2(Kakao, Multi) - Account2(Toss)
+
+아래 사진을 통해, Single로 설정한 Toss 뱅크에 Toss 카드를 삽입하여 출금을 시도할  경우, 2,000원의 수수료가 부과되는 것을 확인할 수 있다.
+
+Transfer
+ATM1(Toss, Single) 보내는 계좌: Account1 (Toss) -> 받는 계좌: Account2(Toss)
+
+ATM1(Toss, Single) 보내는 계좌: Account1 (Toss) -> 받는 계좌: Account3(Kakao)
+
+ATM2(Kakao, Multi) 보내는 계좌: Account1 (Toss) -> 받는 계좌: Account2(Toss)
+
+
+
 
 9. `(REQ1.9) An admin can access the menu of “Transaction History” via an admin card (See REQ Display of Transaction History).`  
    `![][image19]`  
