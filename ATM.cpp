@@ -7,6 +7,7 @@
 
 using namespace std;
 
+class ATM;
 
 class User {
 protected:
@@ -59,7 +60,7 @@ public:
     string getAdditionalInfo() const { return additionalInfo; }
 };
 
-
+vector<Transaction*> allTransactions;
 class DepositTransaction : public Transaction {
 public:
     DepositTransaction(int id, const string& accountNb, const string& card, int amt)
@@ -190,7 +191,7 @@ Bank* findBankByName(const string& bankName, const vector<Bank*>& allBanks) {
 }
 
 
-
+void displaySnapshot(const vector<Bank>& banks, const vector<ATM>& atms);
 
 class ATM {
 private:
@@ -201,7 +202,6 @@ private:
     int cash1000, cash5000, cash10000, cash50000;
     string adminCardNumber = "0000"; //adm card면 접근(REQ1.9)
     bool session_active = false;              // 세션 상태 표시 (REQ2.1, REQ2.2)
-    vector<Transaction*> allTransactions; // 전체 거래
     vector<Transaction*> session_transactions; // 세션 내 거래
 
 
@@ -211,9 +211,6 @@ public:
         cash1000(c1000), cash5000(c5000), cash10000(c10000), cash50000(c50000) {
     }
     ~ATM() {
-        for (Transaction* transaction : allTransactions) {
-            delete transaction;
-        }
         for (Transaction* transaction : session_transactions) {
             delete transaction;
         }
@@ -883,14 +880,14 @@ public:
             int cash1000, cash5000, cash10000, cash50000;
             int command;
             int insertedAmount;
-
+            transferFee = 1000;
             // Prompt user to confirm inserting the transfer fee first
             if (language_signal == 1) {
-                cout << "A transfer fee of KRW " << transferFee << " will be deducted.\n";
+                cout << "Cash transfer fee costs KRW " << transferFee << ". Please insert the same amount of cash to the ATM.\n";
                 cout << "1. Confirm\n2. Cancel\n-> ";
             }
             else {
-                cout << "송금 수수료는 KRW " << transferFee << " 원입니다. \n";
+                cout << "송금 수수료는 KRW " << transferFee << " 원입니다. 수수료만큼의 현금을 투입해주세요. \n";
                 cout << "1. 확인\n2. 취소\n-> ";
             }
             cin >> command;
@@ -1070,7 +1067,7 @@ public:
 
 
 
-    void startSession(const vector<Bank*>& allBanks , const vector<Bank>& banks, const vector<ATM>& atms) {
+    void startSession(const vector<Bank*>& allBanks, const vector<Bank>& banks, const vector<ATM>& atms) {
         if (cash1000 == 0 && cash5000 == 0 && cash10000 == 0 && cash50000 == 0) {
             cout << "ATM has no cash available. Session terminated.\n";
             return;
@@ -1101,7 +1098,7 @@ public:
                 else {
                     cout << "관리자 세션이 시작되었습니다.\n";
                 }//L
-                return startAdminSession();
+                return startAdminSession(allTransactions);
             }
 
             // Check if account exists in any bank
@@ -1178,18 +1175,18 @@ public:
 
                     cin >> choice;
 
-                    if (cin.fail() || choice < 1 || choice > 4) {
+                    if (choice == '1' || choice == '2' || choice == '3' || choice == '4' || choice == '/') {
+                        validInput = true; // 유효한 입력
+                    }
+                    else {
                         cin.clear(); // 에러 플래그 초기화
                         cin.ignore(1000, '\n'); // 버퍼 비우기
                         if (language_signal == 1) {
-                            cout << "Invalid choice. Please enter a number between 1 and 4.\n";
+                            cout << "Invalid choice. Please enter a valid option (1-4 or '/').\n";
                         }
                         else {
-                            cout << "잘못된 선택입니다. 1에서 4 사이의 숫자를 입력하세요.\n";
+                            cout << "잘못된 선택입니다. 유효한 옵션(1-4 또는 '/')을 입력하세요.\n";
                         }
-                    }
-                    else {
-                        validInput = true; // 유효한 입력
                     }
                 }
 
@@ -1206,7 +1203,7 @@ public:
                 case '3':
                     transfer(authenticatedAccount, cardBank, allBanks, language_signal);
                     break;
-                case'/':
+                case '/':
                     displaySnapshot(banks, atms);
                 }
             }
@@ -1252,13 +1249,13 @@ public:
     }
 
 
-    void startAdminSession() {
+    void startAdminSession(vector<Transaction*>& allTransactions) {
         string command;
         cout << "Admin session started. Displaying Transaction History.\n";
-        cout << "Would you like to view the Transaction History? (Enter 'JJass' or 'yes') :";
+        cout << "Would you like to view the Transaction History? (Enter 'yes') :";
         cin >> command;
-        if (command == "JJass" || command == "yes") {
-            displayTransactionHistory();
+        if (command == "yes") {
+            displayTransactionHistory(allTransactions);
         }
         else {
             return;
@@ -1266,7 +1263,7 @@ public:
     }
 
     //11/18 20:41
-    void addTransaction(int id, const string& account, const string& card, const string& type, int amt, const string& info = "") {
+    void addTransaction(int id, const string& account, const string& card, const string& type, int amt, const string& info = "", vector<Transaction*>& allTransactions = ::allTransactions) {
         if (id == 0) {
             if (type == "Deposit") {
                 session_transactions.push_back(new DepositTransaction(account, card, amt));
@@ -1303,7 +1300,7 @@ public:
         }
 
     }
-    void displayTransactionHistory() {
+    void displayTransactionHistory(const vector<Transaction*>& allTransactions) {
         cout << "\n===== Transaction History =====\n";
 
         // 모든 거래 내역 출력
@@ -1366,6 +1363,7 @@ int main() {
     vector<string> banknames;
     bool vaildbankname;
     banks.reserve(100);
+    vector<Transaction*> allTransactions; // 전체 거래
 
 
     // 사용자로부터 은행 이름을 반복적으로 입력받아 초기화
