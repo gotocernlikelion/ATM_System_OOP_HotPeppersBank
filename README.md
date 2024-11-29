@@ -120,9 +120,10 @@ ATM1은 Toss bank 기반 Single ATM이고, ATM2는 Toss bank 기반 Multi ATM이
 
 
 Unilingual한 ATM에 로그인하는 케이스는 위의 REQ1.2의 스크린샷을 통해 확인할 수 있다. session 로그인시에 Bilingual한 ATM은 언어를 선택할지 물어보지만, Unilingual한 ATM에 로그인할시에는 그냥 영어 그대로 보여주게된다.
-<img src="img/REQ1_3_1.png">
-   <img src="img/image32.png">
 
+   <img src="img/image32.png">
+   
+   <img src="img/image4.png">
 ATM을 설정하는 과정에서 unilingual or bilingual인지 선택할 수 있다. 사용자가 Uni를 입력했을 경우, session 로그인시에 영어로만 출력하고 Bi를 입력할 경우, session 이후에 아래 사진과 같이 영어를 또는 한국어를 선택할 수 있다.
 
 #### (REQ1.4) A Bank deposits a certain amount of cashes to an ATM to serve users.   <a name="req1.4"></a>
