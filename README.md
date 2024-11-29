@@ -18,7 +18,7 @@ This report documents the implementation of an ATM system as per the requirement
 
 ---
 
-# Table of Contents
+## Table of Contents
 
 1. [Introduction](#introduction)  
 2. [Requirement Implementation](#requirement-implementation)  
