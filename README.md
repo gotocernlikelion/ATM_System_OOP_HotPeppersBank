@@ -1,6 +1,6 @@
 # OOP Term Project Report: Automated Teller Machine (ATM) System Development 
 
-<img src="img/HotPeppersBank.png" width="400" height="400">
+<img src="img/HotPeppersBank.png" width="150" height="150">
 
 
 Authors: **Woohyuk Kwon, Daeyang Seo, Wonjung Baek, Junho Kim**  
