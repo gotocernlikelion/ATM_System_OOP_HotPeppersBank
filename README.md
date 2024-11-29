@@ -78,7 +78,7 @@ This report documents the implementation of an ATM system as per the requirement
 
 ---
 
-## 2. Requirement Implementation
+## Requirement Implementation
 
 ### REQ 1: System Setup
 
