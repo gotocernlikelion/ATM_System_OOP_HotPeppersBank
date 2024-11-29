@@ -671,7 +671,7 @@ Invalid ATM index 라는 말과 함께 다시 session을 시작하는 지점으�
 
 (1) session 입력란에서 “/” 를 입력하면 모든 ATM에 대한 Snapshot이 뜬다.
 
-<img src="img/Ex5.png">
+<img src="img/10_0.png">
 
 (2) Transaction 선택란에서 “/” 를 입력해도 모든 ATM에 대한 Snapshot이 뜬다.
 
