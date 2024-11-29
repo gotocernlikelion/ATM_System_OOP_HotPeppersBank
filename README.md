@@ -219,7 +219,7 @@ Cash Transfer
 
 
 #### (REQ1.9) An admin can access the menu of “Transaction History” via an admin card (See REQ Display of Transaction History).<a name="req1.9"></a>
-<img src="img/image46.png">
+<img src="1_9.png">
 앞전에서 여러 거래를 진행한 후, session을 다시 실행하여 admin card에 해당하는 ‘0000’ 카드로 로그인하면, Transaction History를 확인할 수 있다. 
 
 #### (REQ1.10) An ATM only accepts and returns the following types of cashes and checks.  <a name="req1.10"></a>
@@ -227,7 +227,7 @@ Cash Transfer
 - (Cash type) KRW 1,000, KRW 5,000, KRW 10,000, KRW 50,000
 - ◼ When implementing the ATM, you need to take each denomination of bills into account. In other words, instead of representing the ATM’s remaining cash as a single number, it should be implemented in a way that allows you to know how many bills of each denomination are left.   
      
-<img src="img/image60.png">
+<img src="1_10.png">
 
 위 사진과 같이 ATM 화면에는 남아 있는 현금의 잔여 개수가 표시되며, 각 지폐별로 잔량이 나타납니다. 예를 들어, 1,000원권, 5,000원권, 10,000원권, 그리고 50,000원권의 지폐 개수가 각각 얼마 남아 있는지가 명확하게 확인 가능하다.  
       
