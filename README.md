@@ -11,6 +11,7 @@ This report documents the implementation of an ATM system as per the requirement
 
 <img src="img/uml.png">
 ---
+
 # Table of Contents
 
 1. [Introduction](#introduction)  
