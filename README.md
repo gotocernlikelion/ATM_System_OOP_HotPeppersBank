@@ -1,5 +1,6 @@
 # OOP Term Project Report: Automated Teller Machine (ATM) System Development 
-HotPeppers_Bank
+
+<img src="HotPeppersBank.png">
 
 Authors: **Woohyuk Kwon, Daeyang Seo, Wonjung Baek, Junho Kim**  
 Submission Date: 2024년 11월 27일   
