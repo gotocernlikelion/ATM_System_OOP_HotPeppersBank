@@ -70,7 +70,7 @@ Submission Date: 2024년 11월 27일
 
 ---
 
-## 1. Introduction
+## Introduction
 
 This report documents the implementation of an ATM system as per the requirements specified in the project instructions. The system was developed using Object-Oriented Programming (OOP) principles in C++ and consists of ATM, Bank, and Account classes. This document explains how each requirement was implemented with supporting command-line screenshots.
 
