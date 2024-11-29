@@ -8,7 +8,7 @@ Submission Date: 2024년 11월 27일
 
 This report documents the implementation of an ATM system as per the requirements specified in the project instructions. The system was developed using Object-Oriented Programming (OOP) principles in C++ and consists of ATM, Bank, and Account classes. This document explains how each requirement was implemented with supporting command-line screenshots.
 
-<img src="img/48.png">
+<img src="uml.png">
 
 ---
 
@@ -164,7 +164,7 @@ Account 와 ATM은 compile 이후 사용자가 cmd에서 값을 입력해서 생
 ATM 선택 후, 유저가 카드를 입력하면서 session이 시작된다. 
 
 #### (REQ2.2) A session ends whenever a user wishes (e.g., by choosing a cancel button) or there are some exceptional conditions detected by the ATM (e.g., no cash available).
-
+<img src="img/REQ2_2.png">
    
 
 #### (REQ2.3) When a session ends, the summary of all transactions performed in a session must be displayed. 
@@ -173,7 +173,7 @@ ATM 선택 후, 유저가 카드를 입력하면서 session이 시작된다.
 
 - If no transactions are successfully completed during the session, it is acceptable not to print a summary.
   
-<img src="img/image17.png">
+<img src="img/REQ2_3.png">
 
    
 
@@ -459,11 +459,33 @@ The transaction history is saved to a text file (transaction_history.txt).
 
 #### (REQ9.1) The ATM shall display an appropriate error message for each exception scenario (both explicitly stated in this document and implicitly assumed ones), then end the session.` 
 
-1) 없는 ATM을 사용하겠다고 입력할시 (ex. ATM은 2대인데 3번째 ATM을 쓴다고 입력)
-   
-<img src="img/image51.png">
 
-Invalid ATM index 라는 말과 함께 
+
+1. 없는 ATM을 사용하겠다고 입력할시 (ex. ATM은 2대인데 3번째 ATM을 쓴다고 입력)
+<img src="img/Ex1.png">
+Invalid ATM index 라는 말과 함께 다시 session을 시작하는 지점으로 돌아간다.
+
+
+
+2. 없는 카드번호 입력시
+<img src="img/Ex2.png">
+
+
+
+3. Session에서 없는 Transaction 번호 호출시
+<img src="img/Ex3.png">
+
+
+
+4. 돈의 수량을 음수(negative)로 입력했을 때 
+<img src="img/Ex4.png">
+
+
+
+5. Session을 입력하는데 잘못된 문자를 입력할 때
+<img src="img/Ex5.png">
+
+
 
 ---
 
@@ -474,7 +496,12 @@ Invalid ATM index 라는 말과 함께
 ◼ (e.g., ATM [SN: 111111] remaining cash: {KRW 50000 : 0, KRW 10000 : 1, KRW 5000 : 2, KRW 1000 : 1}, ATM [SN: 222222] remaining cash: {KRW 50000 : 5, KRW 10000 : 3, KRW 5000 : 1, KRW 1000 : 2}) - All accounts’ information: Remaining balance   
      
 ◼ (e.g., Account [Bank: Kakao, No: 111111111111, Owner: Jenny] balance: 7000, Account [Bank: Daegu, No: 222222222222, Owner: Tom] balance: 1000, Account [Bank: Shinhan, No: 333333333333, Owner: Jenny] balance: 2000)
-   
+
+1. session 입력란에서 “/” 를 입력하면 모든 ATM에 대한 Snapshot이 뜬다.
+<img src="img/Ex5.png">
+2. Transaction 선택란에서 “/” 를 입력해도 모든 ATM에 대한 Snapshot이 뜬다.
+<img src="img/Ex5.png">
+
 ---
 
 ## 3. Conclusion
