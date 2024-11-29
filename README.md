@@ -95,18 +95,26 @@ This report documents the implementation of an ATM system as per the requirement
    <img src="img/image1.png">
 ATM을 개설할 때마다 사용자로부터 Serial Number를 입력받도록 구현되었다. 또한, 각 ATM은 고유한 6자리 Serial Number를 가져야 하므로, Serial Number가 중복되면 다시 입력을 요청해야하고 입력된 Serial Number가 6자리가 아니면 올바른 형식으로 입력하라는 메시지를 출력하고 재입력을 요구해야 한다. 위 사진은 ATM1의 Serial Number를 123123으로 설정한 경우, ATM2의 Serial Number는 123123으로 설정할 수 없도록 중복이 방지되는 것을 확인할 수 있다다. 또한, Serial Number가 3자리수와 같이 올바르지 않은 경우 ATM 설정이 거부되고 재입력을 요구하는 것을 확인할 수 있다.
 
-The system is implemented to prompt the user for a Serial Number whenever a new ATM is created. Each ATM must have a unique six-digit Serial Number. If a duplicate Serial Number is entered, the system will request the user to input a different number. Additionally, if the entered Serial Number is not six digits long, a message is displayed asking the user to provide a valid format, and the system prompts for re-entry. The provided image demonstrates that when the Serial Number for ATM1 is set to "123123," it cannot be assigned to ATM2, ensuring no duplicates. Furthermore, if an invalid Serial Number, such as a three-digit number, is entered, the ATM setup is rejected, and the system requests re-entry.
 
 #### (REQ1.2) An ATM is set to one of the following types: (1) Single Bank ATM, (2) Multi-Bank ATM.  <a name="req1.2"></a> 
    <img src="img/image8.png">
 ATM기를 개설하는 과정에서 Single인지, Multi인지 사용자가 선택할 수 있도록 구현하였다.   
-     
+<img src="img/REQ1_2_1.png">
+<img src="img/REQ1_2_2.png">
+ATM1은 Toss bank 기반 Single ATM이고, ATM2는 Toss bank 기반 Multi ATM이다. 따라서 ATM1에 Kakao 계좌인 ‘2345’계좌로 로그인을 할 시, Invalid card로 뜨면서 접근이 불가해진다.
+반면 ATM2에 동일한 ‘2345’ 계좌로 로그인을 할 시, 접근이 가능해지고 거래를 진행할 수 있게된다. 
+
+
 #### (REQ1.3) An ATM may support either unilingual or bilingual languages.   <a name="req1.3"></a>
    - When an ATM is configured unilingual, all information is displayed in English only.   
-   - When an ATM is configured bilingual, a user can choose if the information is to be displayed either English or Korean (Note: if you know only one of the languages, consider using a language translation service, such as Google Translation).  
+   - When an ATM is configured bilingual, a user can choose if the information is to be displayed either English or Korean (Note: if you know only one of the languages, consider using a language translation service, such as Google Translation).
+
+
+Unilingual한 ATM에 로그인하는 케이스는 위의 REQ1.2의 스크린샷을 통해 확인할 수 있다. session 로그인시에 Bilingual한 ATM은 언어를 선택할지 물어보지만, Unilingual한 ATM에 로그인할시에는 그냥 영어 그대로 보여주게된다.
+<img src="img/REQ1_3_1.png">
    <img src="img/image32.png">
    <img src="img/image4.png">
-ATM을 설정하는 과정에서 unilingual or bilingual인지 선택할 수 있다. 사용자가 Uni를 입력했을 경우, 영어로만 출력하고 Bi를 입력할 경우, session 이후에 아래 사진과 같이 영어를 또는 한국어를 선택할 수 있다.
+ATM을 설정하는 과정에서 unilingual or bilingual인지 선택할 수 있다. 사용자가 Uni를 입력했을 경우, session 로그인시에 영어로만 출력하고 Bi를 입력할 경우, session 이후에 아래 사진과 같이 영어를 또는 한국어를 선택할 수 있다.
 
 #### (REQ1.4) A Bank deposits a certain amount of cashes to an ATM to serve users.   <a name="req1.4"></a>
    <img src="img/image4.png">
@@ -115,6 +123,8 @@ ATM의 초기설정에서 각 ATM의 1,000원, 5,000원, 10,000원, 50,000원 �
 #### (REQ1.5) A Bank can open an Account for a user with the necessary information to perform bank services.   <a name="req1.5"></a>
    - (e.g.) Bank name (e.g, Kakao, Shinhan), User name, Account number (12-digit), Available funds, Transaction histories.   
 <img src="img/image68.png">
+
+Bank Creation 이후, Account Creation 과정에서 계좌 개설 과정이 이루어진다. 여기서는 Bank Creation에서 생성된 은행들에 해당하는 계좌만 생성이 가능하여, Bank Name을 입력받고 이후 User Name, Account Number, Available funds(balance)와 Password들을 설정한다. Transaction History는 이후 거래가 진행되면서 그에 해당하는 정보가 입력된다. 
   
 #### (REQ1.6) A user may have multiple Accounts in a Bank.  <a name="req1.6"></a>
 <img src="img/image3.png">
@@ -190,10 +200,15 @@ ATM1(Toss, Single) 보내는 계좌: Account1 (Toss) -> 받는 계좌: Account3(
 ATM2(Kakao, Multi) 보내는 계좌: Account1 (Toss) -> 받는 계좌: Account2(Toss)
 <img src="img/image35.png">
 
+Cash Transfer
+<img src="img/Cash_transfer.png">
+현금 계좌이체의 경우는 fee가 primary/non-primary bank 관계에 상관없이 1000원 고정이다.
+
 
 
 #### (REQ1.9) An admin can access the menu of “Transaction History” via an admin card (See REQ Display of Transaction History).<a name="req1.9"></a>
 <img src="img/image46.png">
+앞전에서 여러 거래를 진행한 후, session을 다시 실행하여 admin card에 해당하는 ‘0000’ 카드로 로그인하면, Transaction History를 확인할 수 있다. 
 
 #### (REQ1.10) An ATM only accepts and returns the following types of cashes and checks.  <a name="req1.10"></a>
 
@@ -217,6 +232,8 @@ ATM2(Kakao, Multi) 보내는 계좌: Account1 (Toss) -> 받는 계좌: Account2(
 <수표>  
     
 <img src="img/image21.png">
+
+위와같이 현금을 ATM에 넣어줄때 각 단위 지폐별로 입력받고, 수표를 넣어줄때는 10만원만 넘어가면 얼마던지 유효한 수표로 인정한다.
       
 #### (REQ1.11) All accounts and ATMs shall be created and initialized during the program execution.  
 - During the program execution, the necessary information to create accounts and ATMs shall be given from a user via console input (i.e., hard coding of account and ATM information is not allowed).  
@@ -227,7 +244,8 @@ ATM2(Kakao, Multi) 보내는 계좌: Account1 (Toss) -> 받는 계좌: Account2(
 
 <img src="img/image26.png">
 
-Account 와 ATM은 compile 이후 사용자가 cmd에서 값을 입력해서 생성한다.   
+Account 와 ATM은 compile 이후, Bank Initialization => Account Creation => ATM Creation Step 을 순서대로 거치면서 생성된다. 
+
     
 
 ---
@@ -252,6 +270,8 @@ ATM 선택 후, 유저가 카드를 입력하면서 session이 시작된다.
 - If no transactions are successfully completed during the session, it is acceptable not to print a summary.
   
 <img src="img/REQ2_3.png">
+4를 입력해서 Session을 종료(Exit)하면 Transaction summary가 나온다.
+각 Transaction 특징에 맞게 target account 의 표시 여부가 달라진다.
 
    
 
@@ -259,7 +279,7 @@ ATM 선택 후, 유저가 카드를 입력하면서 session이 시작된다.
      
 <img src="img/image12.png">
 
-Transaction 마다 ID가 있다. 
+각 거래별마다 unique한 ID를 부여하여, 모든 거래가 다른 숫자를 가지도록 제작하였다. 
 
 ---
 
@@ -286,7 +306,7 @@ ATM1은 현재 Toss bank의 Single 타입ATM 이므로, 여기에 invalid한 Woo
 
 <img src="img/image59.png">
 
-ATM에서 입력한 비밀번호를 받아 authenticateUser 함수를 통해 인증하는 과정이다. 비밀번호가 올바르면 인증 성공 메시지를 출력하고, 계좌와 연결된 은행을 식별합니다. 인증 실패 시 적절한 메시지를 출력하며, 재입력을 요청한다.
+ATM에서 입력한 비밀번호를 받아 authenticateUser 함수를 통해 인증하는 과정이다. 비밀번호가 올바르면 인증 성공 메시지를 출력하고, 계좌와 연결된 은행을 식별합니다. 인증 실패 시 적절한 메시지를 출력하며, 재입력을 요청한다. 총 3번의 시도가 가능하다.
      
 #### (REQ3.4) If the entered password is incorrect, the ATM shall display an appropriate error message (e.g., Wrong Password). <a name="req3.4"></a>
 
@@ -321,6 +341,11 @@ deposit 종류를 Cash deposit과 Check deposit으로 나눠서 구현하였다.
 <img src="img/image29.png">
 
 Cash deposit에서, 현금을 넣는 개수가 50개가 넘어갈때 갯수 초과로 인한 에러 메세지가 출력되고 있다. 현금 개수를 적절하게 분배하더라도, 총합 개수가 50이 넘어가면 에러 메세지가 출력된다.
+
+<img src="img/REQ4_2_1.png">
+<img src="img/REQ4_2_2.png">
+Check deposit에서는, 수표를 30개까지 넣을 수 있다. 수표를 넣는 개수가 30개가 넘어간 31개부터는 갯수 초과로 인한 에러 메시지가 정상적으로 출력된다.
+
 
 #### (REQ4.3) Once cash or checks are accepted by ATM, the transaction must be reflected to the bank account as well (i.e., the same amount of fund must be added to the corresponding bank account). <a name="req4.3"></a>
      
