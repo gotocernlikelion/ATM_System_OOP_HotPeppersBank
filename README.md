@@ -138,8 +138,9 @@ Bank Creation 이후, Account Creation 과정에서 계좌 개설 과정이 이�
   
 #### (REQ1.6) A user may have multiple Accounts in a Bank.  <a name="req1.6"></a>
 <img src="img/image3.png">
-위 사진은 dy1 유저가 toss 은행 계좌를 1개 만드는 것을 보여준다.  
-     
+
+위 사진은 dy1이름을 가진 동일한 유저가 각각 다른 toss 은행 계좌를 2개 만들 수 있다는 것을 보여준다.
+
 #### (REQ1.7) A user may have Accounts in multiple Banks.<a name="req1.7"></a>
 <img src="img/image14.png">
 Kukyang 유저가 Kakao와 Toss 은행의 계좌를 개설하는 사진이다. 
