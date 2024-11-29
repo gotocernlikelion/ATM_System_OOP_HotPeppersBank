@@ -16,8 +16,8 @@ Submission Date: 2024년 11월 27일
    - [REQ 6: Transfer](#req-6-transfer)  
    - [REQ 7: Transaction History](#req-7-transaction-history)  
    - [REQ 8: Multi-language Support](#req-8-multi-language-support)  
-   - [REQ 9: Exception Handling](#req-9-exception-handling)  
-   - [REQ 10: Display of Account/ATM Snapshot](#req-10-display-of-accountatm-snapshot)  
+   - [REQ 9: Exception Handling](#req-9--exception-handling)  
+   - [REQ 10: Display of Account/ATM Snapshot](#req-10---display-of-accountatm-snapshot)  
 3. [Conclusion](#conclusion)
 
 ---
