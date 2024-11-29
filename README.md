@@ -78,7 +78,7 @@ This report documents the implementation of an ATM system as per the requirement
    - [REQ 9: Exception Handling](#req-9-exception-handling)  
  	  - [REQ 9.1](#req9.1) (The ATM shall display an appropriate error message for each exception scenario)  
    - [REQ 10: Display of Account/ATM Snapshot](#req-10-display-of-accountatm-snapshot)  
-	- [REQ 10.1](#req10.1) (When the character '/' is given as a console input, ATM and account snapshots are displayed)  
+ 	  - [REQ 10.1](#req10.1) (When the character '/' is given as a console input, ATM and account snapshots are displayed)  
 
 3. [Conclusion](#conclusion)
 
