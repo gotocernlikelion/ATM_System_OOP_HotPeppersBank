@@ -127,7 +127,9 @@ Unilingual한 ATM에 로그인하는 케이스는 위의 REQ1.2의 스크린샷�
 ATM을 설정하는 과정에서 unilingual or bilingual인지 선택할 수 있다. 사용자가 Uni를 입력했을 경우, session 로그인시에 영어로만 출력하고 Bi를 입력할 경우, session 이후에 아래 사진과 같이 영어 또는 한국어를 선택할 수 있다.
 
 #### (REQ1.4) A Bank deposits a certain amount of cashes to an ATM to serve users.   <a name="req1.4"></a>
-   <img src="1_4.png">
+   
+   <img src="img/1_4.png">
+
 ATM의 초기설정에서 각 ATM의 1,000원, 5,000원, 10,000원, 50,000원 지폐 수를 설정할 수 있다. 
 
 #### (REQ1.5) A Bank can open an Account for a user with the necessary information to perform bank services.   <a name="req1.5"></a>
@@ -219,7 +221,7 @@ Cash Transfer
 
 
 #### (REQ1.9) An admin can access the menu of “Transaction History” via an admin card (See REQ Display of Transaction History).<a name="req1.9"></a>
-<img src="1_9.png">
+<img src="img/1_9.png">
 앞전에서 여러 거래를 진행한 후, session을 다시 실행하여 admin card에 해당하는 ‘0000’ 카드로 로그인하면, Transaction History를 확인할 수 있다. 
 
 #### (REQ1.10) An ATM only accepts and returns the following types of cashes and checks.  <a name="req1.10"></a>
@@ -227,7 +229,7 @@ Cash Transfer
 - (Cash type) KRW 1,000, KRW 5,000, KRW 10,000, KRW 50,000
 - ◼ When implementing the ATM, you need to take each denomination of bills into account. In other words, instead of representing the ATM’s remaining cash as a single number, it should be implemented in a way that allows you to know how many bills of each denomination are left.   
      
-<img src="1_10.png">
+<img src="img/1_10.png">
 
 위 사진과 같이 ATM 화면에는 남아 있는 현금의 잔여 개수가 표시되며, 각 지폐별로 잔량이 나타납니다. 예를 들어, 1,000원권, 5,000원권, 10,000원권, 그리고 50,000원권의 지폐 개수가 각각 얼마 남아 있는지가 명확하게 확인 가능하다.  
       
