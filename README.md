@@ -8,12 +8,29 @@ Submission Date: 2024년 11월 27일
 
 1. [Introduction](#introduction)  
 2. [Requirement Implementation](#requirement-implementation)  
-   - [REQ 1: System Setup](#req-1-system-setup)
-     	- [REQ 1.1](#req1.1)
-   	- [REQ 1.2](#req1.2) (An ATM is set to one of the following types: (1) Single Bank ATM, (2) Multi-Bank ATM)  
-    	- [REQ 1.3](#req1.3) (An ATM may support either unilingual or bilingual languages)    
+   - [REQ 1: System Setup](#req-1-system-setup)  
+     - [REQ 1.1](#req1.1) (An ATM has a 6-digit serial number that can be uniquely identified among all ATMs)  
+     - [REQ 1.2](#req1.2) (An ATM is set to one of the following types: (1) Single Bank ATM, (2) Multi-Bank ATM)  
+     - [REQ 1.3](#req1.3) (An ATM may support either unilingual or bilingual languages)  
+     - [REQ 1.4](#req1.4) (A Bank deposits a certain amount of cashes to an ATM to serve users)  
+     - [REQ 1.5](#req1.5) (A Bank can open an Account for a user with the necessary information to perform bank services)  
+     - [REQ 1.6](#req1.6) (A user may have multiple Accounts in a Bank)  
+     - [REQ 1.7](#req1.7) (A user may have Accounts in multiple Banks)  
+     - [REQ 1.8](#req1.8) (Each ATM has several types of transaction fees)  
+     - [REQ 1.9](#req1.9) (An admin can access the menu of “Transaction History” via an admin card)  
+     - [REQ 1.10](#req1.10) (An ATM only accepts and returns the following types of cashes and checks)  
+     - [REQ 1.11](#req1.11) (All accounts and ATMs shall be created and initialized during the program execution)  
    - [REQ 2: ATM Session](#req-2-atm-session)  
+     - [REQ 2.1](#req2.1) (A session starts when a user inserts a card)  
+     - [REQ 2.2](#req2.2) (A session ends whenever a user wishes)  
+     - [REQ 2.3](#req2.3) (When a session ends, the summary of all transactions performed in a session must be displayed)  
+     - [REQ 2.4](#req2.4) (Each transaction has a unique identifier across all sessions)  
    - [REQ 3: User Authorization](#req-3-user-authorization)  
+     - [REQ 3.1](#req3.1) (An ATM checks if the inserted card is valid for the current type of ATM)  
+     - [REQ 3.2](#req3.2) (If an invalid card is inserted, the ATM shall display an appropriate error message)  
+     - [REQ 3.3](#req3.3) (An ATM shall ask a user to enter the password and verify if the password is correct)  
+     - [REQ 3.4](#req3.4) (If the entered password is incorrect, the ATM shall display an appropriate error message)  
+     - [REQ 3.5](#req3.5) (If a user enters wrong passwords 3 times in a row, a session is aborted, and the card is returned)  
    - [REQ 4: Deposit](#req-4-deposit)  
    - [REQ 5: Withdrawal](#req-5-withdrawal)  
    - [REQ 6: Transfer](#req-6-transfer)  
@@ -42,34 +59,36 @@ This report documents the implementation of an ATM system as per the requirement
    <img src="img/image1.png">
 ATM을 개설할 때마다 사용자로부터 Serial Number를 입력받도록 구현되었다. 또한, 각 ATM은 고유한 6자리 Serial Number를 가져야 하므로, Serial Number가 중복되면 다시 입력을 요청해야하고고 입력된 Serial Number가 6자리가 아니면 올바른 형식으로 입력하라는 메시지를 출력하고 재입력을 요구해야 한다. 위 사진은 ATM1의 Serial Number를 123123으로 설정한 경우, ATM2의 Serial Number는 123123으로 설정할 수 없도록 중복이 방지되는 것을 확인할 수 있다다. 또한, Serial Number가 3자리수와 같이 올바르지 않은 경우 ATM 설정이 거부되고 재입력을 요구하는 것을 확인할 수 있다.
 
-#### (REQ1.2) An ATM is set to one of the following types: (1) Single Bank ATM, (2) Multi-Bank ATM.   
+#### (REQ1.2) An ATM is set to one of the following types: (1) Single Bank ATM, (2) Multi-Bank ATM.  <a name="req1.2"></a> 
    <img src="img/image8.png">
 ATM기를 개설하는 과정에서 Single인지, Multi인지 사용자가 선택할 수 있도록 구현하였다.   
      
-#### (REQ1.3) An ATM may support either unilingual or bilingual languages.   
+#### (REQ1.3) An ATM may support either unilingual or bilingual languages.   <a name="req1.3"></a>
    - When an ATM is configured unilingual, all information is displayed in English only.   
    - When an ATM is configured bilingual, a user can choose if the information is to be displayed either English or Korean (Note: if you know only one of the languages, consider using a language translation service, such as Google Translation).  
    <img src="img/image32.png">
    <img src="img/image4.png">
 ATM을 설정하는 과정에서 unilingual or bilingual인지 선택할 수 있다. 사용자가 Uni를 입력했을 경우, 영어로만 출력하고 Bi를 입력할 경우, session 이후에 아래 사진과 같이 영어를 또는 한국어를 선택할 수 있다.
 
-#### (REQ1.4) A Bank deposits a certain amount of cashes to an ATM to serve users.   
+#### (REQ1.4) A Bank deposits a certain amount of cashes to an ATM to serve users.   <a name="req1.4"></a>
    <img src="img/image4.png">
 ATM의 초기설정에서 각 ATM의 1,000원, 5,000원, 10,000원, 50,000원 지폐 수를 설정할 수 있다. 
 
-#### (REQ1.5) A Bank can open an Account for a user with the necessary information to perform bank services.   
+#### (REQ1.5) A Bank can open an Account for a user with the necessary information to perform bank services.   <a name="req1.5"></a>
    - (e.g.) Bank name (e.g, Kakao, Shinhan), User name, Account number (12-digit), Available funds, Transaction histories.   
 <img src="img/image68.png">
   
-#### (REQ1.6) A user may have multiple Accounts in a Bank.  
+#### (REQ1.6) A user may have multiple Accounts in a Bank.  <a name="req1.6"></a>
 <img src="img/image3.png">
 위 사진은 dy1 유저가 toss 은행 계좌를 1개 만드는 것을 보여준다.  
      
-#### (REQ1.7) A user may have Accounts in multiple Banks.
+#### (REQ1.7) A user may have Accounts in multiple Banks.<a name="req1.7"></a>
 <img src="img/image14.png">
 Kukyang 유저가 Kakao와 Toss 은행의 계좌를 개설하는 사진이다. 
 
-#### (REQ1.8) Each ATM have several types of transaction fees, and paid as follows: - Deposit fee for non-primary banks: KRW 2,000; the fee is paid by inserting additional cash. - Deposit fee for primary banks: KRW 1,000; the fee is paid by inserting additional cash. 
+#### (REQ1.8) Each ATM have several types of transaction fees, and paid as follows: <a name="req1.8"></a>
+- Deposit fee for non-primary banks: KRW 2,000; the fee is paid by inserting additional cash.
+- Deposit fee for primary banks: KRW 1,000; the fee is paid by inserting additional cash. 
 - Deposit fee for non-primary banks: KRW 2,000; the fee is paid by inserting additional cash.
 - Deposit fee for primary banks: KRW 1,000; the fee is paid by inserting additional cash. 
 - Withdrawal fee for a primary bank: KRW 1,000; the fee is paid from the withdrawal account.
@@ -135,10 +154,10 @@ ATM2(Kakao, Multi) 보내는 계좌: Account1 (Toss) -> 받는 계좌: Account2(
 
 
 
-#### (REQ1.9) An admin can access the menu of “Transaction History” via an admin card (See REQ Display of Transaction History).
+#### (REQ1.9) An admin can access the menu of “Transaction History” via an admin card (See REQ Display of Transaction History).<a name="req1.9"></a>
 <img src="img/image46.png">
 
-#### (REQ1.10) An ATM only accepts and returns the following types of cashes and checks.  
+#### (REQ1.10) An ATM only accepts and returns the following types of cashes and checks.  <a name="req1.10"></a>
 
 - (Cash type) KRW 1,000, KRW 5,000, KRW 10,000, KRW 50,000
 - ◼ When implementing the ATM, you need to take each denomination of bills into account. In other words, instead of representing the ATM’s remaining cash as a single number, it should be implemented in a way that allows you to know how many bills of each denomination are left.   
