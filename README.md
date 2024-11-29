@@ -8,7 +8,7 @@ Submission Date: 2024년 11월 27일
 
 1. [Introduction](#introduction)  
 2. [Requirement Implementation](#requirement-implementation)  
-   - [System Setup](#system-setup)  
+   - [req-1-system-setup](#system-setup)  
      - [REQ 1.1: Unique Serial Number for ATMs](#req-11-unique-serial-number-for-atms)  
      - [REQ 1.2: ATM Types (Single/Multibank)](#req-12-atm-types-singlemultibank)  
      - [REQ 1.3: Language Configuration (Unilingual/Bilingual)](#req-13-language-configuration-unilingualbilingual)  
