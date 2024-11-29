@@ -13,7 +13,7 @@ Submission Date: 2024년 11월 27일
 ## Introduction
 
 
-This report documents the implementation of an ATM system as per the requirements specified in the project instructions. The system, which is the Term Project for the DGIST Fall 2024 Object-Oriented Programming (OOP) course, was developed using Object-Oriented Programming (OOP) principles in C++ and consists of ATM, Bank, and Account classes. This document explains how each requirement was implemented with supporting command-line screenshots.
+This report documents the implementation of an ATM system as per the requirements specified in the project instructions. The system, which is the Term Project for the **DGIST Fall 2024 Object-Oriented Programming (OOP) course**, was developed using Object-Oriented Programming (OOP) principles in C++ and consists of ATM, Bank, and Account classes. This document explains how each requirement was implemented with supporting command-line screenshots.
 
 <img src="img/uml.PNG">
 
