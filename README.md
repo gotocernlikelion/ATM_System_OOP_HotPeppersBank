@@ -181,7 +181,7 @@ Kukyang이라는 이름을 가진 동일한 유저가 각각 Kakao와 Toss 은�
 
 ATM 생성을 위 표와 같이 한 상태이다.
 
-* **Deposit**
+(1) **Deposit**
 
 ATM 1(Toss, single) - Account 1 (Toss) 
 <img src="img/image47.png">
@@ -191,7 +191,7 @@ ATM2(Kakao, Multi) - Account2(Toss)
 <img src="img/image66.png">
 위 사진을 통해, Multi로 설정한 Kakao 뱅크에 Toss 카드를 삽입하여 입금을 시도할 경우, 2,000원의 수수료가 부과되는 것을 확인할 수 있다.
 
-* **Withdraw**
+(2) **Withdraw**
 
 ATM1(Toss, single) - Account1 (Toss)
 <img src="img/image19.png">
@@ -201,7 +201,7 @@ ATM2(Kakao, Multi) - Account2(Toss)
 <img src="img/image16.png">
 	아래 사진을 통해, Single로 설정한 Toss 뱅크에 Toss 카드를 삽입하여 출금을 시도할  경우, 2,000원의 수수료가 부과되는 것을 확인할 수 있다.
 
-* **Transfer**
+(3) **Transfer**
 
 ATM1(Toss, Single) 보내는 계좌: Account1 (Toss) -> 받는 계좌: Account2(Toss)
 <img src="img/image39.png">
