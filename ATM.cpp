@@ -744,6 +744,9 @@ public:
                 addTransaction(Transaction::transaction_counter++, account->getAccountNumber(), account->getcardNumber(), "Withdraw", withdrawalAmount, ""); //11.18 21:49
                 addTransaction(0, account->getAccountNumber(), account->getcardNumber(), "Withdraw", withdrawalAmount, "");
             }
+            if (cash1000 + cash5000 + cash10000 + cash50000 == 0) {
+                return;
+            }
 
             // 출금 세션 종료 조건 체크
             withdrawalsThisSession++;
@@ -1161,6 +1164,16 @@ public:
 
             session_transactions.clear();
             while (true) {
+                //11.29
+                // ATM에 현금이 모두 소진된 경우 세션 종료
+                if (cash1000 + cash5000 + cash10000 + cash50000 == 0) {
+                    if (language_signal == 1) {
+                        cout << "ATM has run out of cash. Ending session.\n";
+                    } else {
+                        cout << "ATM에 현금이 모두 소진되었습니다. 세션을 종료합니다.\n";
+                    }
+                    return;
+                }
                 char choice;
                 bool validInput = false;
 
