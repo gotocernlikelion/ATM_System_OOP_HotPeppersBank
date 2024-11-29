@@ -260,7 +260,7 @@ Account 와 ATM은 compile 이후, Bank Initialization => Account Creation => AT
 ATM 선택 후, 유저가 카드를 입력하면서 session이 시작된다. 
 
 #### (REQ2.2) A session ends whenever a user wishes (e.g., by choosing a cancel button) or there are some exceptional conditions detected by the ATM (e.g., no cash available).<a name="req2.2"></a>
-<img src="img/REQ2_2.png">
+<img src="img/REQ2_2.PNG">
    
 
 #### (REQ2.3) When a session ends, the summary of all transactions performed in a session must be displayed. <a name="req2.3"></a>
