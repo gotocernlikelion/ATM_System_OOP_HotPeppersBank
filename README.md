@@ -185,36 +185,36 @@ ATM 생성을 위 표와 같이 한 상태이다.
 
 (1) **Deposit**
 
-ATM 1(Toss, single) - Account 1 (Toss) 
+- ATM 1(Toss, single) - Account 1 (Toss) 
 <img src="img/image47.png">
 위 사진을 통해, Single로 설정한 Toss 뱅크에 Toss 카드를 삽입하여 입금을 시도할 경우, 1,000원의 수수료가 부과되는 것을 확인할 수 있다.
 
-ATM2(Kakao, Multi) - Account2(Toss)
+- ATM2(Kakao, Multi) - Account2(Toss)
 <img src="img/image66.png">
 위 사진을 통해, Multi로 설정한 Kakao 뱅크에 Toss 카드를 삽입하여 입금을 시도할 경우, 2,000원의 수수료가 부과되는 것을 확인할 수 있다.
 
 (2) **Withdraw**
 
-ATM1(Toss, single) - Account1 (Toss)
+- ATM1(Toss, single) - Account1 (Toss)
 <img src="img/image19.png">
 	위 사진을 통해, Single로 설정한 Toss 뱅크에 Toss 카드를 삽입하여 출금을 시도할  경우, 1,000원의 수수료가 부과되는 것을 확인할 수 있다.    
 
-ATM2(Kakao, Multi) - Account2(Toss)
+- ATM2(Kakao, Multi) - Account2(Toss)
 <img src="img/image16.png">
 	아래 사진을 통해, Single로 설정한 Toss 뱅크에 Toss 카드를 삽입하여 출금을 시도할  경우, 2,000원의 수수료가 부과되는 것을 확인할 수 있다.
 
 (3) **Transfer**
 
-ATM1(Toss, Single) 보내는 계좌: Account1 (Toss) -> 받는 계좌: Account2(Toss)
+- ATM1(Toss, Single) 보내는 계좌: Account1 (Toss) -> 받는 계좌: Account2(Toss)
 <img src="img/image39.png">
 
-ATM1(Toss, Single) 보내는 계좌: Account1 (Toss) -> 받는 계좌: Account3(Kakao)
+- ATM1(Toss, Single) 보내는 계좌: Account1 (Toss) -> 받는 계좌: Account3(Kakao)
 <img src="img/image18.png">
 
-ATM2(Kakao, Multi) 보내는 계좌: Account1 (Toss) -> 받는 계좌: Account2(Toss)
+- ATM2(Kakao, Multi) 보내는 계좌: Account1 (Toss) -> 받는 계좌: Account2(Toss)
 <img src="img/image35.png">
 
-Cash Transfer
+(4) **Cash Transfer**
 <img src="img/Cash_transfer.png">
 현금 계좌이체의 경우는 fee가 primary/non-primary bank 관계에 상관없이 1000원 고정이다.
 
