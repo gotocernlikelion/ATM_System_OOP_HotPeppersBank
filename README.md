@@ -124,7 +124,7 @@ Unilingual한 ATM에 로그인하는 케이스는 위의 REQ1.2의 스크린샷�
    <img src="img/image32.png">
    
    <img src="img/image4.png">
-ATM을 설정하는 과정에서 unilingual or bilingual인지 선택할 수 있다. 사용자가 Uni를 입력했을 경우, session 로그인시에 영어로만 출력하고 Bi를 입력할 경우, session 이후에 아래 사진과 같이 영어를 또는 한국어를 선택할 수 있다.
+ATM을 설정하는 과정에서 unilingual or bilingual인지 선택할 수 있다. 사용자가 Uni를 입력했을 경우, session 로그인시에 영어로만 출력하고 Bi를 입력할 경우, session 이후에 아래 사진과 같이 영어 또는 한국어를 선택할 수 있다.
 
 #### (REQ1.4) A Bank deposits a certain amount of cashes to an ATM to serve users.   <a name="req1.4"></a>
    <img src="img/image4.png">
