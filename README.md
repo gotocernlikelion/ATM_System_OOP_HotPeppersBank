@@ -381,14 +381,14 @@ non primary 이므로 수수료는 2000원. 수수료에 동의하면서 수수�
      
 - Primary bank
   
-<img src="img/image44.png">
+<img src="img/REQ4_4_1.png">
 
-primary 이므로 수수료는 1000원. 수수료에 동의하면서 수수료를 지불한다(The deposit amount and the fee must be entered separately).   
+Primary Bank인 경우 입금할 때, 수수료가 1000원이다. 수수료에 동의를 하면 ATM에 1000원 지폐를 수수료로 낸 것으로 처리한다(The deposit amount and the fee must be entered separately). 
      
 - Non Primary Bank  
 
-<img src="img/image56.png">
-non primary 이므로 수수료는 2000원. 수수료에 동의하면서 수수료를 지불한다(The deposit amount and the fee must be entered separately). 
+<img src="img/REQ4_4_2.png">
+Non primary Bank인 경우 입금할 때, 수수료가 2000원이다. 수수료에 동의를 하면 ATM에 1000원 지폐를 2장으로 수수료 낸 것으로 처리한다.(The deposit amount and the fee must be entered separately). 
 
 #### (REQ4.5) The deposited cash increase available cash in ATM that can be used by other users. <a name="req4.5"></a>
 
