@@ -93,7 +93,9 @@ This report documents the implementation of an ATM system as per the requirement
 #### (REQ1.1) An ATM has a 6-digit serial number that can be uniquely identified among all ATMs (e.g., 315785).<a name="req1.1"></a>   
    <img src="img/image58.png">
    <img src="img/image1.png">
-ATM을 개설할 때마다 사용자로부터 Serial Number를 입력받도록 구현되었다. 또한, 각 ATM은 고유한 6자리 Serial Number를 가져야 하므로, Serial Number가 중복되면 다시 입력을 요청해야하고고 입력된 Serial Number가 6자리가 아니면 올바른 형식으로 입력하라는 메시지를 출력하고 재입력을 요구해야 한다. 위 사진은 ATM1의 Serial Number를 123123으로 설정한 경우, ATM2의 Serial Number는 123123으로 설정할 수 없도록 중복이 방지되는 것을 확인할 수 있다다. 또한, Serial Number가 3자리수와 같이 올바르지 않은 경우 ATM 설정이 거부되고 재입력을 요구하는 것을 확인할 수 있다.
+ATM을 개설할 때마다 사용자로부터 Serial Number를 입력받도록 구현되었다. 또한, 각 ATM은 고유한 6자리 Serial Number를 가져야 하므로, Serial Number가 중복되면 다시 입력을 요청해야하고 입력된 Serial Number가 6자리가 아니면 올바른 형식으로 입력하라는 메시지를 출력하고 재입력을 요구해야 한다. 위 사진은 ATM1의 Serial Number를 123123으로 설정한 경우, ATM2의 Serial Number는 123123으로 설정할 수 없도록 중복이 방지되는 것을 확인할 수 있다다. 또한, Serial Number가 3자리수와 같이 올바르지 않은 경우 ATM 설정이 거부되고 재입력을 요구하는 것을 확인할 수 있다.
+
+The system is implemented to prompt the user for a Serial Number whenever a new ATM is created. Each ATM must have a unique six-digit Serial Number. If a duplicate Serial Number is entered, the system will request the user to input a different number. Additionally, if the entered Serial Number is not six digits long, a message is displayed asking the user to provide a valid format, and the system prompts for re-entry. The provided image demonstrates that when the Serial Number for ATM1 is set to "123123," it cannot be assigned to ATM2, ensuring no duplicates. Furthermore, if an invalid Serial Number, such as a three-digit number, is entered, the ATM setup is rejected, and the system requests re-entry.
 
 #### (REQ1.2) An ATM is set to one of the following types: (1) Single Bank ATM, (2) Multi-Bank ATM.  <a name="req1.2"></a> 
    <img src="img/image8.png">
