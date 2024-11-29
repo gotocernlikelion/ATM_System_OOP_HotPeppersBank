@@ -143,7 +143,8 @@ Bank Creation 이후, Account Creation 과정에서 계좌 개설 과정이 이�
 
 #### (REQ1.7) A user may have Accounts in multiple Banks.<a name="req1.7"></a>
 <img src="img/image14.png">
-Kukyang 유저가 Kakao와 Toss 은행의 계좌를 개설하는 사진이다. 
+
+Kukyang이라는 이름을 가진 동일한 유저가 각각 Kakao와 Toss 은행의 계좌를 개설하는 사진이다.
 
 #### (REQ1.8) Each ATM have several types of transaction fees, and paid as follows: <a name="req1.8"></a>
 - Deposit fee for non-primary banks: KRW 2,000; the fee is paid by inserting additional cash.
