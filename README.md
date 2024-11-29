@@ -437,81 +437,127 @@ ATM에 5만원권 0장, 만원권 18장, 5천원권 19장, 천원권 22장인 �
      
 #### (REQ5.3) Once the withdrawal is successful, the transaction must be reflected to the bank account as well (i.e., the same amount of fund must be deducted from the corresponding bank account).   <a name="req5.3"></a>
 
-759,000원이었던 계좌에서 수수료 천원과 16000원이 출금되어 742,000원이 되었다.
+<img src="img/5_3_1.png">
+
+<img src="img/5_3_2.png">
+
+<img src="img/5_3_3.png">
+
+ATM(SerialNum: 123456, Toss Single ATM)에서, Account ‘1234’로 session을 로그인하여 withdraw과정을 진행했다. 24000원을 출금하면, primary bank 수수료는 1,000원이 계좌에서 자동으로 차감된다. 따라서, 5만원이었던 계좌에는 withdraw amount 24,000원 + fee 1,000 원까지 해서 총 25,000원이 정상적으로 빠지는 것을 확인할 수 있다.
+
 
 #### (REQ5.4) Some withdrawal fee may be charged (See REQ in System Setup). <a name="req5.4"></a>
 
 (1) Withdrawal fee for a primary bank: KRW 1,000
 
+<img src="img/5_4_1.png">
+
 Primary Bank(Atm과 카드 모두 toss인 상황) 에서 fee 1000원이 청구된다.
 
 (2) Withdrawal fee for non-primary banks: KRW 2,000;
+
+<img src="img/5_4_2.png">
 
 Non-primary bank (atm은 kakao, 카드는 toss) 일 때 fee 2000원이 청구된다.
      
 #### (REQ5.5) The cash withdrawal lowers available cash in the ATM that can be used by other users.  <a name="req5.5"></a>
 
-16,000원은 만원 한장, 5천원 한장, 그리고 천원 한장이므로 각 한장씩 ATM 잔여 현금이 줄어 들었다.
+<img src="img/5_5.png">
+
+각 종류의 지폐가 10개씩 들어있던 상황에서, 24,000원을 출금하였다. 24,000원은 5만원0장, 만원 2장, 5천원 0장, 그리고 천원 4장이므로 해당 지폐 개수에 맞게 ATM에서 잔여 지폐 개수가 줄어들었다.
      
 #### (REQ5.6) The maximum number of withdrawals per each session is 3.  <a name="req5.6"></a>
-- If a user wants to withdraw four times, it needs to end the current session after withdrawing three times and restart another session for one more withdrawal.  
+- If a user wants to withdraw four times, it needs to end the current session after withdrawing three times and restart another session for one more withdrawal.
+
+<img src="img/5_6.png">
      
-3번 인출 후 추가 인출을 같은 session에서 시도할 경우 경고 메시지와 함께 withdraw가 진행되지 않는다.
+3번 인출 후 추가적으로 withdraw를 같은 session에서 시도할 경우, 경고 메시지와 함께 withdraw가 진행되지 않고, Select Transaction 화면으로 돌아간다.
      
 #### (REQ5.7) The maximum amount of cash withdrawal per transaction is KRW 500,000.  <a name="req5.7"></a> 
- 
-1,000,000원 인출을 시도했다. 최대 500,000원 인출이 가능하다는 경고메시지와 함께 인출이 진행되지 않는다.
+
+<img src="img/5_7.png">
+
+1,000,000원 인출을 시도했다. 최대 500,000원 인출이 가능하다는 경고메시지와 함께 인출이 진행되지 않는다. 
 
 ---
 
 ### REQ 6: Transfer
 
 #### (REQ6.1) An ATM shall ask a user to choose the transfer types either cash transfer or account fund transfer.  <a name="req6.1"></a>
+
+<img src="img/6_1.png">
      
-session 시작 후 Transfer를 선택하면, Cash Transfer나 Account transfer 중에 어떤 거래를 시작할건지 물어보게 한다.  
-     
+session 시작 후 Transfer를 선택하면, Cash Transfer나 Account transfer 중에 어떤 거래를 시작할건지 물어보게 한다. 
+
 #### (REQ6.2) For both cash and account transfers, an ATM shall ask the destination account number where the fund is to be transferred.<a name="req6.2"></a>
 
-- 2.1 Cash transfer  
- 
-Cash transfer에서 ATM이 destination bank를 먼저 물어보고, 해당 bank가 존재하는지 확인한 뒤에 destination account number를 입력받는다.
+(1) Cash transfer  
+
+<img src="img/6_2_1.png">
+
+Cash transfer에서, ATM이 destination bank를 먼저 물어보고, 해당 bank가 존재하는지 확인한 뒤에 destination account number를 입력받는다.
      
-- 2.2 Account transfer
-   
+(2) Account transfer
+
+<img src="img/6_2_2.png">
+
 Account transfer에서도 마찬가지로 destination bank를 물어보고, 해당 destination bank의 account number를 입력받는다.   
      
      
      
 #### (REQ6.3) For cash transfer, an ATM shall ask the user to insert the cash and transaction fees. After all the cash has been inserted, the ATM shall verify the amount to be transferred, excluding the  transaction fee. All inserted cash, minus the transaction fee, shall be transferred.  <a name="req6.3"></a>
 
-Cash transfer에서, 먼저 primary/non-primary bank 에 따른 수수료를     체크해서, 사용자에게 먼저 이 수수료를 지불할건지 물어본다. 이후 Confirm을 눌러서 수수료를 지불하고, 넣을 현금의 개수를 입력하게된다. 넣은 현금의 개수를 총합한 값을 다시 사용자에게 알려주며 한 번 더 verify 과정을 거치고,
+<img src="img/6_3.png">
+
+Cash transfer에서, 먼저 primary/non-primary bank 에 따른 수수료를     체크해서, 사용자에게 먼저 이 수수료를 지불할건지 물어본다. 이후 Confirm을 눌러서 수수료를 지불하고, 넣을 현금의 개수를 입력하게된다. 넣은 현금의 개수를 총합한 값을 다시 사용자에게 알려주며 한 번 더 verify 과정을 거치고, (1000+5000+10000+50000=66000) 수수료를 제외한 총 넣은 지폐가 원하는 계좌에 송금된다.
 
 #### (REQ6.4) For account transfer, an ATM shall ask the source account number, and the amount of fund to be transferred. (If it is assumed that the source account has already been accessed at the start of the session using a card or other means, there is no need to ask again.) <a name="req6.4"></a>
 
-     
+<img src="img/6_4.png">
+
+Account Transfer에서는 먼저 목적지 계좌의 bank이름을 물어보고, 계좌번호를 입력받은 뒤, 계좌를 성공적으로 찾게되면 transfer할 금액을 입력한다. source Account는 이미 session 로그인할때 로그인된 계좌이므로, 해당 정보를 활용하여 source Account 정보는 다시 물어보지 않는다.
+
 #### (REQ6.5) Some transfer fee may be charged (See REQ in System Setup).   <a name="req6.5"></a>
 
-5.0 Initial Bank/Account/ATM Setting
+(1) Initial Bank/Account/ATM Setting
+
+<img src="img/6_5_1.png">
+
+<img src="img/6_5_2.png">
+
+(2) Transfer between primary banks(Fee : 2000)
+
+<img src="img/6_5_3.png">
+
+ATM1(Toss Single ATM)에 Card number가 1234인 Toss 카드로 로그인하여, destination bank를 계좌번호가 222233334444로 설정해두면 primary 계정 사이에서의 거래이므로 fee가 2000원으로 정상적으로 요구하는 것을 볼 수 있다.
      
-5.1 Transfer between primary banks(Fee : 2000)
+(3) Transfer between primary and non-primary banks(Fee : 3000)
 
-ATM1(Toss Single ATM)에 Toss’1234’계정으로 로그인하여, destination bank를 Toss ‘2345’ 계정으로 설정해두면 primary 계정 사이에서의 거래이므로 fee가 2000원으로 정상적으로 요구하는 것을 볼 수 있다.  
-     
-5.2 Transfer between primary and non-primary banks(Fee : 3000)
+<img src="img/6_5_4.png">
 
-ATM2(Woori Multi ATM)에 Toss ‘1234’ 계정으로 로그인하여, destination bank를 Woori ‘3456’ 계정으로 두면, non-primary 와 primary bank 사이의 거래이므로 올바르게 3000원의 fee를 요구하게된다.
-   
+ATM2(Woori Multi ATM)에 Card number가 1234인 Toss 카드로 로그인하여, destination bank를 계좌번호가 333344445555로 설정해두면 non-primary 계정 사이에서의 거래이므로 fee가 3000원으로 정상적으로 요구하는 것을 볼 수 있다.
 
-5.3 Transfer between non-primary banks(Fee : 4000)
+(4) Transfer between non-primary banks(Fee : 4000)
 
-ATM2를 사용해서 거래를 진행할거고, ATM2는 현재 Woori bank - Multi bank이다. 이때 세션 로그인을 Toss bank 계정 ‘1234’ 으로 했고, destination bank를 마찬가지로 non-priamry bank 계정인 ‘2345’계정으로 송금한다. 둘 다 non-primary bank이므로, 이때 fee는 4000원으로 올바르게 뜬다는 것을 확인할 수 있다.
+<img src="img/6_5_5.png">
+
+ATM2를 사용하여 거래를 진행할 예정이다. 현재 ATM2는 Woori Bank - Multi Bank로 설정되어 있으며, 세션 로그인은 카드 번호 2345인 Toss 계좌로 진행되었다. 송금 대상 은행은 Toss Non-Primary Bank로, 계좌 번호는 111122223333입니다. 두 계좌 모두 Non-Primary Bank이므로, 송금 수수료는 4,000원이 정상적으로 부과된다.
 
 #### (REQ6.6) The inserted cash for transfer increase available cash in ATM that can be used by other users. <a name="req6.6"></a>
-   
-     
+
+<img src="img/6_6.png">
+
+Cash transfer에서 계좌이체할 현금을 입력하면, 수수료 현금 1000원을 포함한 모든 현금들이 ATM의 available cash 개수에 반영된다. ATM의 기존 현금은 다음과 같았다 => 1000원 : 16개, 5000원 : 14개, 10000원 : 13개, 50000 : 12개 
+이후에 Cash transfer에서 1000원권 2개, 5000원권 2개, 10000뭔권 2개, 50000원권 2개를 투입하면, 현금 수수료 1000원 1개를 포함해서 최종적으로 1000원 : 19개, 5000원 : 16개, 10000원 : 15개, 50000 : 14개 이렇게 ATM의 available cash 개수가 정상적으로 늘어나게 된다.
+
      
 #### (REQ6.7) Once the transfer is successful, the transaction must be reflected to the bank account as well (i.e., the same amount of fund must be deducted from the source bank account, and then added to the destination bank account).  <a name="req6.7"></a>
  
+바로 위의 REQ6.6에서, Cash deposit일때 구현된 경우를 확인할 수 있다. transfer 이전의 목적지 계좌의 잔액은 : 204,000원이었고, cash trasnfer로 131,000원을 transfer하면, 최종적으로 목적지 계좌는 335,000원이 된다.
+
+<img src="img/6_7.png">
+
+Account Transfer의 경우에는, 원천 계좌의 잔액이 50000원이었고, 여기서 30,000만큼 transfer하면 fee 3,000원을 합한 33,000원이 원천계좌에서 빠져 17,000원이 남았다. 그리고 목적지 계좌에는 30,000원 만큼 transfer되었을 것이므로, 335,000원에서 30,000원 추가한 365,000원이 목적지 계좌에 남았다.
 
 ### REQ 7: Transaction History
 
@@ -519,7 +565,8 @@ ATM2를 사용해서 거래를 진행할거고, ATM2는 현재 Woori bank - Mult
 
 <img src="img/image7.png">
 
-0000을 입력하면 (admin code) Admin mode로 들어간다. Transaction history를 묻고, 여기서 yes라고 하면 History를 조회할 수 있다.
+0000을 입력하면 (admin code) Admin mode로 들어간다. Transaction history를 묻고, 여기서 yes라고 하면 History를 조회할 수 있다. 
+
      
 #### (REQ7.2) When the “Transaction History” menu is selected, an ATM displays the information of all transactions from all users since the system started.<a name="req7.2"></a>
 - Transaction ID, Card Number, Transaction Types, Amount, other transaction-specific information 
@@ -527,16 +574,20 @@ ATM2를 사용해서 거래를 진행할거고, ATM2는 현재 Woori bank - Mult
   
 <img src="img/image23.png">
 
-Transaction ID가 부여된다. 각 기능 별로 필요한 정보 (Source account, Destination account 등) 가 뜬다.
+yes를 입력하면 Transaction History가 뜨는데, Transaction ID가 부여되고, 순서대로 Card Number, Transaction Type, Amount가 표시되는 것을 확인할 수 있고, 이 Transaction History는 프로그램 전체에서의 거래 내역에 해당한다.
+Transfer과 같은 경우는 목적지 계좌에 대한 정보가 필요하므로, 기본 정보도 그대로 보여주면서 목적지 계좌도 추가해주었다.
+
      
      
 #### (REQ7.3) The “Transaction History” information shall be outputted to the external file (e.g., txt file).<a name="req7.3"></a> 
      
 The transaction history is saved to a text file (transaction_history.txt).
 
-<img src="img/image28.png">
+<img src="img/7_3_1.png">
 
-<img src="img/image55.png">
+<img src="img/7_3_2.png">
+
+cpp 메인 코드가 저장된 라이브러리와 동일한 위치에 transaction_history.txt 파일을 생성하여 cmd화면에 출력된 텍스트와 동일한 텍스트가 파일에 저장된다.
 
 ---
 
@@ -558,7 +609,7 @@ The transaction history is saved to a text file (transaction_history.txt).
 
 <img src="img/image27.png"> 
 
-언어를 한국어로 선택하고, session을 시작해서 여러가지 Transaction을 진행해보았다.`
+언어를 한국어로 선택하고, session을 시작해서 여러가지 Transaction을 진행해보았다.
 
 ---
 
@@ -568,29 +619,33 @@ The transaction history is saved to a text file (transaction_history.txt).
 
 
 
-1. 없는 ATM을 사용하겠다고 입력할시 (ex. ATM은 2대인데 3번째 ATM을 쓴다고 입력)
+(1) 없는 ATM을 사용하겠다고 입력할시 (ex. ATM은 2대인데 3번째 ATM을 쓴다고 입력)
 <img src="img/Ex1.png">
 Invalid ATM index 라는 말과 함께 다시 session을 시작하는 지점으로 돌아간다.
 
 
-
-2. 없는 카드번호 입력시
+(2) 없는 카드번호 입력시
 <img src="img/Ex2.png">
 
 
 
-3. Session에서 없는 Transaction 번호 호출시
+(3) Session에서 없는 Transaction 번호 호출시
 <img src="img/Ex3.png">
 
 
 
-4. 돈의 수량을 음수(negative)로 입력했을 때 
+(4) 돈의 수량을 음수(negative)로 입력했을 때 
 <img src="img/Ex4.png">
 
 
-
-5. Session을 입력하는데 잘못된 문자를 입력할 때
+(5) Session을 입력하는데 잘못된 문자를 입력할 때
 <img src="img/Ex5.png">
+
+(6)
+<img src="img/9_1.png">
+
+(7)
+<img src="img/9_2.png">
 
 
 
@@ -604,19 +659,12 @@ Invalid ATM index 라는 말과 함께 다시 session을 시작하는 지점으�
      
 ◼ (e.g., Account [Bank: Kakao, No: 111111111111, Owner: Jenny] balance: 7000, Account [Bank: Daegu, No: 222222222222, Owner: Tom] balance: 1000, Account [Bank: Shinhan, No: 333333333333, Owner: Jenny] balance: 2000)
 
-1. session 입력란에서 “/” 를 입력하면 모든 ATM에 대한 Snapshot이 뜬다.
+(1) session 입력란에서 “/” 를 입력하면 모든 ATM에 대한 Snapshot이 뜬다.
+
 <img src="img/Ex5.png">
-2. Transaction 선택란에서 “/” 를 입력해도 모든 ATM에 대한 Snapshot이 뜬다.
-<img src="img/Ex5.png">
+
+(2) Transaction 선택란에서 “/” 를 입력해도 모든 ATM에 대한 Snapshot이 뜬다.
+
+<img src="img/10_1.png">
 
 ---
-
-## 3. Conclusion
-
-This report summarizes the development and implementation of an Automated Teller Machine (ATM) system using Object-Oriented Programming (OOP) principles in C++. The system fulfills the specified requirements by integrating various functionalities such as ATM setup, user authorization, deposit, withdrawal, fund transfer, transaction history management, and multi-language support. Exception handling and session management have also been implemented to ensure robust and user-friendly operations. Key functionalities are demonstrated with screenshots and logs, highlighting compliance with project requirements. The system's design prioritizes accuracy, user experience, and extensibility, ensuring it meets the demands of real-world ATM operations.
-
-Attachments:
-
-- Source code (atm.cpp)  
-- Sample output screenshots  
-- transaction_history.txt
