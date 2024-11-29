@@ -97,10 +97,19 @@ ATM을 개설할 때마다 사용자로부터 Serial Number를 입력받도록 �
 
 
 #### (REQ1.2) An ATM is set to one of the following types: (1) Single Bank ATM, (2) Multi-Bank ATM.  <a name="req1.2"></a> 
+- For Single Bank ATM, the ATM is belonged to a primary bank, and only a card issued by the
+primary bank is considered valid.
+- For a Multi-Bank ATM, there is a primary bank that manages the ATM, but a card issued by 
+any other banks is considered valid.
+
    <img src="img/image8.png">
+   
 ATM기를 개설하는 과정에서 Single인지, Multi인지 사용자가 선택할 수 있도록 구현하였다.   
+
 <img src="img/REQ1_2_1.png">
+
 <img src="img/REQ1_2_2.png">
+
 ATM1은 Toss bank 기반 Single ATM이고, ATM2는 Toss bank 기반 Multi ATM이다. 따라서 ATM1에 Kakao 계좌인 ‘2345’계좌로 로그인을 할 시, Invalid card로 뜨면서 접근이 불가해진다.
 반면 ATM2에 동일한 ‘2345’ 계좌로 로그인을 할 시, 접근이 가능해지고 거래를 진행할 수 있게된다. 
 
