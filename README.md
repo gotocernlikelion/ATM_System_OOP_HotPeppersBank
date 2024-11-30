@@ -24,7 +24,7 @@ This report documents the implementation of an ATM system as per the requirement
 
 1. [Introduction](#introduction)  
 2. [Requirement Implementation](#requirement-implementation)  
-   2.1. [REQ 1: System Setup](#req-1-system-setup)  
+   - [REQ 1: System Setup](#req-1-system-setup)  
      - [REQ 1.1](#req1.1) (An ATM has a 6-digit serial number that can be uniquely identified among all ATMs)  
      - [REQ 1.2](#req1.2) (An ATM is set to one of the following types: (1) Single Bank ATM, (2) Multi-Bank ATM)  
      - [REQ 1.3](#req1.3) (An ATM may support either unilingual or bilingual languages)  
@@ -36,25 +36,29 @@ This report documents the implementation of an ATM system as per the requirement
      - [REQ 1.9](#req1.9) (An admin can access the menu of “Transaction History” via an admin card)  
      - [REQ 1.10](#req1.10) (An ATM only accepts and returns the following types of cashes and checks)  
      - [REQ 1.11](#req1.11) (All accounts and ATMs shall be created and initialized during the program execution)  
-   2.2. [REQ 2: ATM Session](#req-2-atm-session)  
+
+   - [REQ 2: ATM Session](#req-2-atm-session)  
      - [REQ 2.1](#req2.1) (A session starts when a user inserts a card)  
      - [REQ 2.2](#req2.2) (A session ends whenever a user wishes)  
      - [REQ 2.3](#req2.3) (When a session ends, the summary of all transactions performed in a session must be displayed)  
      - [REQ 2.4](#req2.4) (Each transaction has a unique identifier across all sessions)  
-   2.3. [REQ 3: User Authorization](#req-3-user-authorization)  
+
+   - [REQ 3: User Authorization](#req-3-user-authorization)  
      - [REQ 3.1](#req3.1) (An ATM checks if the inserted card is valid for the current type of ATM)  
      - [REQ 3.2](#req3.2) (If an invalid card is inserted, the ATM shall display an appropriate error message)  
      - [REQ 3.3](#req3.3) (An ATM shall ask a user to enter the password and verify if the password is correct)  
      - [REQ 3.4](#req3.4) (If the entered password is incorrect, the ATM shall display an appropriate error message)  
      - [REQ 3.5](#req3.5) (If a user enters wrong passwords 3 times in a row, a session is aborted, and the card is returned)
-   2.4. [REQ 4: Deposit](#req-4-deposit)  
+
+   - [REQ 4: Deposit](#req-4-deposit)  
 	   - [REQ 4.1](#req4.1) (An ATM shall take either cash or check from a user)  
 	   - [REQ 4.2](#req4.2) (An ATM shall display an appropriate error message if the number of the inserted cash or checks exceed the limit allowed by the ATM)  
 	   - [REQ 4.3](#req4.3) (Once cash or checks are accepted by ATM, the transaction must be reflected to the bank account)  
 	   - [REQ 4.4](#req4.4) (Some deposit fees may be charged)  
 	   - [REQ 4.5](#req4.5) (The deposited cash increases available cash in the ATM)  
 	   - [REQ 4.6](#req4.6) (The deposited check does not increase available cash in the ATM)
-   2.5. [REQ 5: Withdrawal](#req-5-withdrawal)  
+
+   - [REQ 5: Withdrawal](#req-5-withdrawal)  
 	   - [REQ 5.1](#req5.1) (An ATM shall ask a user to enter the amount of fund to withdraw)  
 	   - [REQ 5.2](#req5.2) (An ATM shall display an appropriate error message if there is insufficient fund in the account or insufficient cash in the ATM)  
 	   - [REQ 5.3](#req5.3) (Once the withdrawal is successful, the transaction must be reflected to the bank account)  
@@ -62,6 +66,7 @@ This report documents the implementation of an ATM system as per the requirement
 	   - [REQ 5.5](#req5.5) (The cash withdrawal lowers available cash in the ATM)  
 	   - [REQ 5.6](#req5.6) (The maximum number of withdrawals per each session is 3)  
 	   - [REQ 5.7](#req5.7) (The maximum amount of cash withdrawal per transaction is KRW 500,000)  
+
    - [REQ 6: Transfer](#req-6-transfer)  
 	   - [REQ 6.1](#req6.1) (An ATM shall ask a user to choose the transfer types: cash transfer or account fund transfer)  
 	   - [REQ 6.2](#req6.2) (For both cash and account transfers, an ATM shall ask the destination account number)  
@@ -70,15 +75,19 @@ This report documents the implementation of an ATM system as per the requirement
 	   - [REQ 6.5](#req6.5) (Some transfer fees may be charged)  
 	   - [REQ 6.6](#req6.6) (The inserted cash for transfer increases available cash in the ATM)  
 	   - [REQ 6.7](#req6.7) (Once the transfer is successful, the transaction must be reflected to the bank account)  
+
    - [REQ 7: Transaction History](#req-7-transaction-history)  
 	   - [REQ 7.1](#req7.1) (When a session is started by an admin by inserting an admin card, an ATM displays a menu of “Transaction History” only)  
 	   - [REQ 7.2](#req7.2) (When the “Transaction History” menu is selected, an ATM displays the information of all transactions)  
 	   - [REQ 7.3](#req7.3) (The “Transaction History” information shall be outputted to the external file)  
+
    - [REQ 8: Multi-language Support](#req-8-multi-language-support)  
 	   - [REQ 8.1](#req8.1) (An ATM configured with bilingual support shall provide an option for a user to choose the preferred language)  
 	   - [REQ 8.2](#req8.2) (Once a certain language is chosen, all menus must be displayed using the chosen language)  
+
    - [REQ 9: Exception Handling](#req-9-exception-handling)  
  	  - [REQ 9.1](#req9.1) (The ATM shall display an appropriate error message for each exception scenario)  
+
    - [REQ 10: Display of Account/ATM Snapshot](#req-10-display-of-accountatm-snapshot)  
  	  - [REQ 10.1](#req10.1) (When the character '/' is given as a console input, ATM and account snapshots are displayed)  
 
