@@ -869,3 +869,101 @@ Account* authenticate(const string& cardNumber, const string& password) {
 * Transaction 클래스: 거래 세부 정보 관리.
 #### 재사용성 강화:
 Bank 클래스의 계좌 검색 메서드는 ATM뿐만 아니라 관리자 세션에서도 동일하게 사용된다.
+
+---
+
+## Inheritance
+
+**Inheritance**는 객체지향 프로그래밍(OOP)의 핵심 개념 중 하나로, 클래스 간 계층 구조를 통해 코드 재사용성을 높이고, 유사한 클래스 간의 관계를 명확히 한다. 이를 통해 상위 클래스의 멤버 변수와 메서드를 하위 클래스에서 물려받아 사용할 수 있으며, 필요에 따라 이를 확장하거나 재정의할 수 있다.
+
+
+### **Inheritance의 주요 특징**
+1. **코드 재사용성**: 상위 클래스의 멤버를 하위 클래스에서 재사용하여 중복 코드를 줄이고, 유지보수성을 높인다.
+2. **계층 구조**: 클래스 간의 관계를 계층적으로 정의하여 설계를 직관적이고 체계적으로 관리할 수 있다.
+3. **확장 가능성**: 하위 클래스는 상위 클래스의 동작을 기반으로 새로운 기능을 추가하거나 기존 동작을 재정의할 수 있다.
+
+
+### **코드에서 Inheritance 적용 사례**
+
+#### 1. Account 클래스와 User 클래스
+- **Account** 클래스는 **User** 클래스를 상속받아 사용자의 정보를 관리한다.
+- **User** 클래스는 `username`과 `password`를 정의하며, 이를 상속받은 **Account** 클래스는 은행 관련 데이터를 추가로 관리한다.
+
+#### **구현 예시**
+```cpp
+class User {
+protected:
+    string username;
+    string password;
+
+public:
+    User(const string& username, const string& password)
+        : username(username), password(password) {}
+};
+
+class Account : public User {
+private:
+    string bankName;
+    string cardNumber;
+
+public:
+    Account(const string& bankName, const string& username, const string& password)
+        : User(username, password), bankName(bankName) {}
+};
+```
+
+#### 2. Transaction 클래스와 하위 클래스
+Transaction 클래스는 기본적인 거래 정보를 관리하는 상위 클래스로 정의되며, 입금, 출금, 송금과 같은 특정 거래 유형은 하위 클래스에서 처리한다.
+상위 클래스의 공통 속성과 동작을 재사용하며, 하위 클래스에서 필요한 부분만 확장하여 구현한다.
+#### 구현 예시
+```cpp
+class Transaction {
+protected:
+    int transactionID;
+    string cardNumber;
+
+public:
+    Transaction(int id, const string& card)
+        : transactionID(id), cardNumber(card) {}
+
+    virtual void process() const {
+        cout << "Processing transaction ID: " << transactionID << endl;
+    }
+};
+
+class DepositTransaction : public Transaction {
+public:
+    DepositTransaction(int id, const string& card)
+        : Transaction(id, card) {}
+
+    void process() const override {
+        cout << "Processing deposit transaction ID: " << transactionID << endl;
+    }
+};
+
+class WithdrawTransaction : public Transaction {
+public:
+    WithdrawTransaction(int id, const string& card)
+        : Transaction(id, card) {}
+
+    void process() const override {
+        cout << "Processing withdrawal transaction ID: " << transactionID << endl;
+    }
+};
+```
+
+#### 3. 계층 구조를 활용한 다형성
+ATM 클래스는 Transaction 포인터를 통해 거래 객체를 다룬다.
+이를 통해 입금, 출금, 송금 등의 다양한 거래 유형을 하나의 인터페이스로 처리할 수 있다.
+#### 구현 예시
+```cpp
+void processTransactions(const vector<Transaction*>& transactions) {
+    for (const auto& transaction : transactions) {
+        transaction->process(); // Polymorphism을 활용하여 동적 바인딩
+    }
+}
+```
+
+---
+
+
