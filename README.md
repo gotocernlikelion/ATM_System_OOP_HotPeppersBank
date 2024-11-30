@@ -713,27 +713,27 @@ Encapsulation의 주요 목적은 데이터를 보호하고, 모듈화를 통해
 
 **User 클래스**:
 
-* username과 password는 protected로 선언하여 클래스 내부와 상속받은 클래스에서만 접근할 수 있도록 제한하였다.
-* 외부에서는 getUserName()과 setPassword() 메서드를 통해 간접적으로 접근할 수 있다.
+* `username`과 `password`는 `protected`로 선언하여 클래스 내부와 상속받은 클래스에서만 접근할 수 있도록 제한하였다.
+* 외부에서는 `getUserName()`과 `setPassword()` 메서드를 통해 간접적으로 접근할 수 있다.
 * 이를 통해 민감한 데이터를 보호하고, 필요할 경우 데이터를 검증하거나 접근 방식을 제어할 수 있다.  
-  **Transaction 클래스**:  
-* cardNumber, accountNumber와 같은 민감한 정보는 private로 선언하여 외부에서 직접 접근할 수 없도록 하였다.  
-* 대신 getCardNumber(), getAccountNumber()와 같은 getter 메서드를 제공하여 필요한 경우에만 데이터를 반환하도록 설계하였다.
+  **`Transaction` 클래스**:  
+* `cardNumber`, `accountNumber`와 같은 민감한 정보는 `private`로 선언하여 외부에서 직접 접근할 수 없도록 하였다.  
+* 대신 `getCardNumber()`, `getAccountNumber()`와 같은 `getter` 메서드를 제공하여 필요한 경우에만 데이터를 반환하도록 설계하였다.
 * 이처럼 직접 접근을 차단하고 메서드를 통해 데이터를 제어함으로써, 거래 정보의 보안성을 유지할 수 있다.
-  **Bank 클래스**:
-* accounts 변수는 private로 선언하여 은행의 계좌 목록을 외부에서 접근하거나 수정할 수 없도록 하였다.
-* 계좌와 관련된 모든 작업은 addAccount()와 authenticate()와 같은 메서드를 통해 이루어진다.
+  **`Bank` 클래스**:
+* `accounts` 변수는 `private`로 선언하여 은행의 계좌 목록을 외부에서 접근하거나 수정할 수 없도록 하였다.
+* 계좌와 관련된 모든 작업은 `addAccount()`와 `authenticate()`와 같은 메서드를 통해 이루어진다.
 * 이를 통해 은행의 계좌 데이터가 외부의 잘못된 접근으로부터 보호되며, 데이터의 일관성을 유지할 수 있다.
-  **ATM 클래스**: 
-* serialNumber, atmType, cash1000 등의 변수는 private로 선언하여 ATM 내부의 데이터를 외부에서 직접 접근하지 못하도록 하였다.
-* 입금, 출금, 송금 등의 작업은 deposit(), withdraw(), transfer() 메서드를 통해서만 처리하도록 설계하였다.
-* 이렇게 내부 데이터를 은닉하고 메서드를 통해 접근을 제한함으로써 ATM의 상태와 동작을 안전하게 관리할 수 있다.
+  **`ATM` 클래스**: 
+* `serialNumber`, `atmType`, `cash1000` 등의 변수는 `private`로 선언하여 `ATM` 내부의 데이터를 외부에서 직접 접근하지 못하도록 하였다.
+* 입금, 출금, 송금 등의 작업은 `deposit()`, `withdraw()`, `transfer()` 메서드를 통해서만 처리하도록 설계하였다.
+* 이렇게 내부 데이터를 은닉하고 메서드를 통해 접근을 제한함으로써 `ATM`의 상태와 동작을 안전하게 관리할 수 있다.
 
- Encapsulation은 단순히 데이터를 숨기는 것뿐만 아니라 객체가 제공하는 메서드를 통해 외부와의 상호작용을 정의하는 데 있다. 예를 들어, Bank 클래스의 authenticate() 메서드는 계좌 인증을 처리하며, 외부에서 직접 계좌 정보를 조작하지 못하게 한다. Encapsulation을 사용함으로써 클래스 간의 결합도를 낮추고, 코드의 유지보수성을 높일 수 있다. 예를 들어, Transaction 클래스는 다양한 거래 유형(DepositTransaction, WithdrawTransaction, TransferTransaction)을 상속받아 구현되었으며, 각 클래스는 Transaction 클래스의 메서드와 데이터를 상속받아 캡슐화를 유지한다.
+ Encapsulation은 단순히 데이터를 숨기는 것뿐만 아니라 객체가 제공하는 메서드를 통해 외부와의 상호작용을 정의하는 데 있다. 예를 들어, Bank 클래스의 `authenticate()` 메서드는 계좌 인증을 처리하며, 외부에서 직접 계좌 정보를 조작하지 못하게 한다. Encapsulation을 사용함으로써 클래스 간의 결합도를 낮추고, 코드의 유지보수성을 높일 수 있다. 예를 들어, `Transaction` 클래스는 다양한 거래 유형(DepositTransaction, WithdrawTransaction, TransferTransaction)을 상속받아 구현되었으며, 각 클래스는 Transaction 클래스의 메서드와 데이터를 상속받아 캡슐화를 유지한다.
 
  ### **코드에서 Encapsulation 적용 예시**
 
-#### User 클래스
+#### `User` 클래스
 ```cpp
 class User {
 protected:
@@ -748,7 +748,7 @@ public:
     void setPassword(const string& password) { this->password = password; }
 };
 ```
-#### Transaction 클래스
+#### `Transaction` 클래스
 ```cpp
 class Transaction {
 private:
@@ -764,7 +764,7 @@ public:
 };
 ```
 
-#### Bank 클래스
+#### `Bank` 클래스
 ```cpp
 class Bank {
 private:
@@ -840,7 +840,7 @@ void displayTransactionHistory() {
 ```
 
 ### 3. 다양한 클래스에서 제공하는 메서드
-#### 3.1 Bank 클래스의 authenticate() 메서드
+#### 3.1 Bank 클래스의 `authenticate()` 메서드
 이 메서드는 카드 번호와 비밀번호를 기반으로 계좌 인증을 처리한다.
 호출자는 인증 과정의 세부사항을 몰라도, 함수 호출만으로 계좌를 인증할 수 있다.
 #### **구현 예시**
@@ -855,13 +855,13 @@ Account* authenticate(const string& cardNumber, const string& password) {
 
 ```
 
-#### 3.2 Transaction 클래스의 processTransaction() 메서드
+#### 3.2 Transaction 클래스의 `processTransaction()` 메서드
 다형성을 통해 각 거래 유형(입금, 출금, 송금)을 처리한다.
 호출자는 거래의 구체적인 처리 방식을 알 필요 없이 동일한 메서드를 호출하여 작업을 수행할 수 있다.
 
 ### Abstraction의 역할
 #### 객체 간 상호작용 단순화:
-예: ATM과 Bank는 authenticate()나 findAccountByCardNumber()와 같은 메서드를 통해 간접적으로 상호작용한다.
+예: ATM과 Bank는 `authenticate()`나 `findAccountByCardNumber()`와 같은 메서드를 통해 간접적으로 상호작용한다.
 이를 통해 ATM과 Bank 간의 결합도를 낮추고, 유지보수성을 높인다.
 #### 클래스 간 역할 분리:
 * ATM 클래스: 거래를 처리하는 역할.
