@@ -784,5 +784,88 @@ public:
 };
 ```
 
+---
+
+## Abstraction
+
+**Abstraction**이란 Object-Oriented Programming(OOP)에서 모듈을 설계할 때, 모듈 사용자들이 세부 구현 과정을 알 필요 없이 기능을 사용할 수 있도록 만드는 개념이다. 이를 통해 객체 간의 복잡한 관계를 단순화하고, 필요한 정보와 기능만을 제공한다.
 
 
+
+### **Abstraction의 주요 목적**
+1. **복잡성 감소**: 불필요한 세부 사항을 숨기고, 필요한 정보와 기능만 제공한다.
+2. **유지보수성 향상**: 내부 구현이 변경되더라도 외부 인터페이스를 수정하지 않음으로써 외부 코드에 미치는 영향을 최소화한다.
+3. **재사용성 증대**: 공통된 인터페이스를 제공함으로써 다양한 객체나 기능을 쉽게 통합하고 재사용할 수 있다.
+
+
+
+### **코드에서 Abstraction이 적용된 사례**
+
+### 1. ATM 클래스의 `startSession()` 함수
+- 이 함수는 사용자 세션을 시작하고, 인증 및 거래를 처리하는 복잡한 로직을 내부적으로 수행한다.
+- 호출자는 함수의 내부 구현을 몰라도, 세션을 시작하고 거래를 선택할 수 있다.
+
+#### **구현 예시**
+```cpp
+void startSession(const vector<Bank*>& allBanks) {
+    cout << "Please Enter your Card number: ";
+    string cardNumber, password;
+    cin >> cardNumber;
+
+    cout << "Enter Password: ";
+    cin >> password;
+
+    if (authenticateUser(allBanks, cardNumber, password)) {
+        cout << "Session started. Welcome!\n";
+        // 세부 구현은 내부적으로 처리됨
+    } else {
+        cout << "Authentication failed. Session terminated.\n";
+    }
+}
+```
+### 2. Display Transaction History
+이 함수는 모든 거래 내역을 출력하거나 파일에 저장한다.
+호출자는 거래 내역이 어떻게 정리되고 저장되는지 알 필요 없이, 함수 호출만으로 작업을 처리할 수 있다.
+#### **구현 예시**
+
+```cpp
+void displayTransactionHistory() {
+    for (const auto& transaction : allTransactions) {
+        cout << "Transaction ID: " << transaction->getTransactionID()
+             << ", Card Number: " << transaction->getCardNumber()
+             << ", Amount: " << transaction->getAmount() << endl;
+    }
+}
+
+```
+
+### 3. 다양한 클래스에서 제공하는 메서드
+#### 3.1 Bank 클래스의 authenticate() 메서드
+이 메서드는 카드 번호와 비밀번호를 기반으로 계좌 인증을 처리한다.
+호출자는 인증 과정의 세부사항을 몰라도, 함수 호출만으로 계좌를 인증할 수 있다.
+#### **구현 예시**
+
+```cpp
+Account* authenticate(const string& cardNumber, const string& password) {
+    if (accounts.count(cardNumber) && accounts[cardNumber].getPassword() == password) {
+        return &accounts[cardNumber];
+    }
+    return nullptr;
+}
+
+```
+
+#### 3.2 Transaction 클래스의 processTransaction() 메서드
+다형성을 통해 각 거래 유형(입금, 출금, 송금)을 처리한다.
+호출자는 거래의 구체적인 처리 방식을 알 필요 없이 동일한 메서드를 호출하여 작업을 수행할 수 있다.
+
+### Abstraction의 역할
+#### 객체 간 상호작용 단순화:
+예: ATM과 Bank는 authenticate()나 findAccountByCardNumber()와 같은 메서드를 통해 간접적으로 상호작용한다.
+이를 통해 ATM과 Bank 간의 결합도를 낮추고, 유지보수성을 높인다.
+#### 클래스 간 역할 분리:
+* ATM 클래스: 거래를 처리하는 역할.
+* Bank 클래스: 계좌 정보 관리.
+* Transaction 클래스: 거래 세부 정보 관리.
+#### 재사용성 강화:
+Bank 클래스의 계좌 검색 메서드는 ATM뿐만 아니라 관리자 세션에서도 동일하게 사용된다.
