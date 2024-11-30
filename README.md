@@ -284,6 +284,7 @@ ATM 선택 후, 유저가 카드를 입력하면서 session이 시작된다.
 #### (REQ2.2) A session ends whenever a user wishes (e.g., by choosing a cancel button) or there are some exceptional conditions detected by the ATM (e.g., no cash available).<a name="req2.2"></a>
 <img src="img/2.2.PNG">
    
+ATM(SerialNum : 123412)에서 각 지폐의 종류가 하나씩만 남은 상황에서, 66000원을 인출하면 ATM 내부의 총 지폐 개수가 0개가 된다. withdraw 직후 남아있는 현금 개수를 체크하여 ‘ATM has run out of cash. Exiting session’ 을 출력하며 현재 session이 자동으로 종료된다. 
 
 #### (REQ2.3) When a session ends, the summary of all transactions performed in a session must be displayed. <a name="req2.3"></a>
 
