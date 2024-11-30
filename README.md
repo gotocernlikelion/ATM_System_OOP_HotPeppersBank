@@ -571,7 +571,7 @@ ATM2를 사용하여 거래를 진행할 예정이다. 현재 ATM2는 Woori Bank
 <img src="img/6_6.png">
 
 Cash transfer에서 계좌이체할 현금을 입력하면, 수수료 현금 1000원을 포함한 모든 현금들이 ATM의 available cash 개수에 반영된다. ATM의 기존 현금은 다음과 같았다 => 1000원 : 16개, 5000원 : 14개, 10000원 : 13개, 50000 : 12개 
-이후에 Cash transfer에서 1000원권 2개, 5000원권 2개, 10000뭔권 2개, 50000원권 2개를 투입하면, 현금 수수료 1000원 1개를 포함해서 최종적으로 1000원 : 19개, 5000원 : 16개, 10000원 : 15개, 50000 : 14개 이렇게 ATM의 available cash 개수가 정상적으로 늘어나게 된다.
+이후에 Cash transfer에서 1000원권 2개, 5000원권 2개, 10000원권 2개, 50000원권 2개를 투입하면, 현금 수수료 1000원 1개를 포함해서 최종적으로 1000원 : 19개, 5000원 : 16개, 10000원 : 15개, 50000 : 14개 이렇게 ATM의 available cash 개수가 정상적으로 늘어나게 된다.
 
      
 #### (REQ6.7) Once the transfer is successful, the transaction must be reflected to the bank account as well (i.e., the same amount of fund must be deducted from the source bank account, and then added to the destination bank account).  <a name="req6.7"></a>
@@ -595,7 +595,7 @@ Account Transfer의 경우에는, 원천 계좌의 잔액이 50000원이었고, 
 - Transaction ID, Card Number, Transaction Types, Amount, other transaction-specific information 
 - Each transaction may have different types of information, so they need to be appropriately displayed (e.g., a deposit transaction does not have the source account information in a transfer transaction).
   
-<img src="img/image23.png">
+<img src="img/7_2_0.png">
 
 yes를 입력하면 Transaction History가 뜨는데, Transaction ID가 부여되고, 순서대로 Card Number, Transaction Type, Amount가 표시되는 것을 확인할 수 있고, 이 Transaction History는 프로그램 전체에서의 거래 내역에 해당한다.
 Transfer과 같은 경우는 목적지 계좌에 대한 정보가 필요하므로, 기본 정보도 그대로 보여주면서 목적지 계좌도 추가해주었다.
@@ -664,13 +664,14 @@ Invalid ATM index 라는 말과 함께 다시 session을 시작하는 지점으�
 (5) Session을 입력하는데 잘못된 문자를 입력할 때
 <img src="img/Ex5.png">
 
-(6)
+(6) Try-catch
 <img src="img/9_1.png">
 
-(7)
+atm serial number를 입력받을 때 이미 있는 serial number라면 runtime_error를 throw한다. catch에서서 이미 있는 serial number임을 알리는 error 메시지를 출력하고 다시 while문을 돌아 입력 받게된다.
+
 <img src="img/9_2.png">
 
-
+Balance를 입력받을 때 int가 아닌 문자를 입력받으면 if(cin.fail())에 걸려 runtime_error를 throw하고 이에 맞는 에러메시지를 출력한다. balance가 음수라면 이에 맞는 에러를 throw하고 catch문에서 음수를 입력받을 수 없다는 것을 출력한다. 이렇게 catch문에 걸리면 continue가 되서 다시 입력받게 된다.
 
 ---
 
