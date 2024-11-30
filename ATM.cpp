@@ -38,7 +38,6 @@ private:
     string accountNumber;
     string transactionType;
     int amount;
-
     string additionalInfo; // 추가 정보 필드
 
 public:
@@ -966,18 +965,9 @@ public:
             this->cash50000 += cash50000;
 
             // Deduct transfer fee from inserted cash
-            transferAmount = insertedAmount - transferFee;
+            transferAmount = insertedAmount;
 
-            // Check if sufficient funds are available after deducting fee
-            if (transferAmount < 0) {
-                if (language_signal == 1) {
-                    cout << "The amount entered is insufficient to cover the transfer fee. Transfer canceled.\n";
-                }
-                else {
-                    cout << "송금 수수료보다 적은 금액을 입력하셨습니다. 송금을 취소합니다. \n";
-                }
-                return; // End process
-            }
+            
             if (language_signal == 1) {
                 cout << "Successfully transferred " << transferAmount << " KRW.\n";
                 addTransaction(-1, sourceAccount->getAccountNumber(), sourceAccount->getcardNumber(), "Transfer", transferAmount, destinationAccountNumber);
@@ -1169,7 +1159,8 @@ public:
                 if (cash1000 + cash5000 + cash10000 + cash50000 == 0) {
                     if (language_signal == 1) {
                         cout << "ATM has run out of cash. Ending session.\n";
-                    } else {
+                    }
+                    else {
                         cout << "ATM에 현금이 모두 소진되었습니다. 세션을 종료합니다.\n";
                     }
                     return;
@@ -1318,6 +1309,7 @@ public:
         // 모든 거래 내역 출력
         for (const auto& transaction : allTransactions) {
             cout << "ID: " << transaction->getTransactionID()
+                <<", Account Number: "<<transaction->getAccountNumber()
                 << ", Card: " << transaction->getCardNumber()
                 << ", Type: " << transaction->getTransactionType()
                 << ", Amount: " << transaction->getAmount();
@@ -1331,6 +1323,7 @@ public:
         ofstream outFile("transaction_history.txt");
         for (const auto& transaction : allTransactions) {
             outFile << "ID: " << transaction->getTransactionID()
+                <<", Account Number: "<<transaction->getAccountNumber()
                 << ", Card: " << transaction->getCardNumber()
                 << ", Type: " << transaction->getTransactionType()
                 << ", Amount: " << transaction->getAmount();
@@ -1525,7 +1518,8 @@ int main() {
                     if (balance < 0) { // 음수 처리
                         throw runtime_error("Balance cannot be negative.");
                     }
-                } catch (const runtime_error& e) {
+                }
+                catch (const runtime_error& e) {
                     cin.clear();
                     cin.ignore(1000, '\n');
                     cout << "Error: " << e.what() << endl;
@@ -1609,9 +1603,10 @@ int main() {
                         }
                     }
                     isDuplicate = false;
-                } catch (const runtime_error& e) {
+                }
+                catch (const runtime_error& e) {
                     cout << "Error: " << e.what() << endl;
-                    isDuplicate=true;
+                    isDuplicate = true;
                     continue; // 다시 입력
                 }
             } while (isDuplicate);
