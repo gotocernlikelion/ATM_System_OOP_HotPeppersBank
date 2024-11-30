@@ -595,10 +595,10 @@ Account Transfer의 경우에는, 원천 계좌의 잔액이 50000원이었고, 
 - Transaction ID, Card Number, Transaction Types, Amount, other transaction-specific information 
 - Each transaction may have different types of information, so they need to be appropriately displayed (e.g., a deposit transaction does not have the source account information in a transfer transaction).
   
-<img src="img/7_2_0.png">
+<img src="img/7_2__1.png">
 
-yes를 입력하면 Transaction History가 뜨는데, Transaction ID가 부여되고, 순서대로 Card Number, Transaction Type, Amount가 표시되는 것을 확인할 수 있고, 이 Transaction History는 프로그램 전체에서의 거래 내역에 해당한다.
-Transfer과 같은 경우는 목적지 계좌에 대한 정보가 필요하므로, 기본 정보도 그대로 보여주면서 목적지 계좌도 추가해주었다.
+yes를 입력하면 Transaction History가 뜨는데, Transaction ID가 부여되고, 순서대로 Account number(source), Card Number, Transaction Type, Amount가 표시되는 것을 확인할 수 있고, 이 Transaction History는 프로그램 전체에서의 거래 내역에 해당한다.
+Account Transfer와 같은 경우는 목적지 계좌에 대한 정보가 필요하므로, 기본 정보도 그대로 보여주면서 목적지 계좌도 추가해주었다.
 
      
      
@@ -608,7 +608,7 @@ The transaction history is saved to a text file (transaction_history.txt).
 
 <img src="img/7_3_1.png">
 
-<img src="img/7_3_2.png">
+<img src="img/7_3__1.png">
 
 cpp 메인 코드가 저장된 라이브러리와 동일한 위치에 transaction_history.txt 파일을 생성하여 cmd화면에 출력된 텍스트와 동일한 텍스트가 파일에 저장된다.
 
