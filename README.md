@@ -691,4 +691,98 @@ Balance를 입력받을 때 int가 아닌 문자를 입력받으면 if(cin.fail(
 
 <img src="img/10_1.png">
 
+
 ---
+
+
+# 4\. List of concepts of object-oriented programming
+
+## Encapsulation
+
+Encapsulation은 객체지향 프로그래밍(Object Oriented Programming, OOP)의 핵심 개념 중 하나로, 데이터와 메서드를 하나의 논리적인 단위로 묶고, 객체의 내부 데이터를 보호하는 방식이다. Encapsulation을 사용하면 객체 내부의 세부 구현을 외부에서 접근할 수 없도록 차단하여 데이터의 무결성을 유지하고, 외부에서는 필요한 메서드를 통해서만 간접적으로 접근할 수 있도록 한다.
+
+Encapsulation의 주요 목적은 데이터를 보호하고, 모듈화를 통해 유지보수성과 안정성을 높이는 데 있다. 이를 통해 객체 내부의 데이터가 무분별하게 변경되는 것을 방지하며, 외부와 객체 간의 상호작용을 간단하고 명확하게 정의할 수 있다.
+
+**Encapsulation의 주요 목적**
+
+1. **데이터 보호**: 객체의 내부 데이터를 보호하여 불필요한 접근이나 변경을 방지한다.  
+1. **모듈화**: 객체의 구현 세부사항을 숨기고, 객체 간의 상호작용을 단순화한다.  
+2. **유지보수성 향상**: 내부 구현 변경 시 외부 코드에 영향을 최소화할 수 있다.
+
+**코드에서 Encapsulation이 적용된 사례**
+
+**User 클래스**:
+
+* username과 password는 protected로 선언하여 클래스 내부와 상속받은 클래스에서만 접근할 수 있도록 제한하였다.
+* 외부에서는 getUserName()과 setPassword() 메서드를 통해 간접적으로 접근할 수 있다.
+* 이를 통해 민감한 데이터를 보호하고, 필요할 경우 데이터를 검증하거나 접근 방식을 제어할 수 있다.  
+  **Transaction 클래스**:  
+* cardNumber, accountNumber와 같은 민감한 정보는 private로 선언하여 외부에서 직접 접근할 수 없도록 하였다.  
+* 대신 getCardNumber(), getAccountNumber()와 같은 getter 메서드를 제공하여 필요한 경우에만 데이터를 반환하도록 설계하였다.
+* 이처럼 직접 접근을 차단하고 메서드를 통해 데이터를 제어함으로써, 거래 정보의 보안성을 유지할 수 있다.
+  **Bank 클래스**:
+* accounts 변수는 private로 선언하여 은행의 계좌 목록을 외부에서 접근하거나 수정할 수 없도록 하였다.
+* 계좌와 관련된 모든 작업은 addAccount()와 authenticate()와 같은 메서드를 통해 이루어진다.
+* 이를 통해 은행의 계좌 데이터가 외부의 잘못된 접근으로부터 보호되며, 데이터의 일관성을 유지할 수 있다.
+  **ATM 클래스**: 
+* serialNumber, atmType, cash1000 등의 변수는 private로 선언하여 ATM 내부의 데이터를 외부에서 직접 접근하지 못하도록 하였다.
+* 입금, 출금, 송금 등의 작업은 deposit(), withdraw(), transfer() 메서드를 통해서만 처리하도록 설계하였다.
+* 이렇게 내부 데이터를 은닉하고 메서드를 통해 접근을 제한함으로써 ATM의 상태와 동작을 안전하게 관리할 수 있다.
+
+ Encapsulation은 단순히 데이터를 숨기는 것뿐만 아니라 객체가 제공하는 메서드를 통해 외부와의 상호작용을 정의하는 데 있다. 예를 들어, Bank 클래스의 authenticate() 메서드는 계좌 인증을 처리하며, 외부에서 직접 계좌 정보를 조작하지 못하게 한다. Encapsulation을 사용함으로써 클래스 간의 결합도를 낮추고, 코드의 유지보수성을 높일 수 있다. 예를 들어, Transaction 클래스는 다양한 거래 유형(DepositTransaction, WithdrawTransaction, TransferTransaction)을 상속받아 구현되었으며, 각 클래스는 Transaction 클래스의 메서드와 데이터를 상속받아 캡슐화를 유지한다.
+
+ ### **코드에서 Encapsulation 적용 예시**
+
+#### User 클래스
+```cpp
+class User {
+protected:
+    string username;
+    string password;
+
+public:
+    User(const string& username, const string& password)
+        : username(username), password(password) {}
+
+    string getUserName() const { return username; }
+    void setPassword(const string& password) { this->password = password; }
+};
+```
+#### Transaction 클래스
+```cpp
+class Transaction {
+private:
+    string cardNumber;
+    int transactionID;
+
+public:
+    Transaction(int id, const string& card) 
+        : transactionID(id), cardNumber(card) {}
+
+    string getCardNumber() const { return cardNumber; }
+    int getTransactionID() const { return transactionID; }
+};
+```
+
+#### Bank 클래스
+```cpp
+class Bank {
+private:
+    unordered_map<string, Account> accounts;
+
+public:
+    void addAccount(const Account& account) {
+        accounts[account.getcardNumber()] = account;
+    }
+
+    Account* authenticate(const string& cardNumber, const string& password) {
+        if (accounts.count(cardNumber) && accounts[cardNumber].getPassword() == password) {
+            return &accounts[cardNumber];
+        }
+        return nullptr;
+    }
+};
+```
+
+
+
